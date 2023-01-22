@@ -38,6 +38,10 @@ monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linea
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
+
 run_all_tests:
 <<<<<<< HEAD
 	./$(BUILD_FOLDER)/test_gradient_descent.out
