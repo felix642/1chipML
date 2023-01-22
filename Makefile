@@ -134,7 +134,8 @@ clean:
 	@(rm -rf $(TESTBUILDDIR))
 	@(rm -rf $(TESTBINDIR))
 
-.PHONY: validate build verify \
+.PHONY: all validate build verify \
+test test_linear_congruential_random_generator test_gauss_elimination test_poly_interpolation \
 create_srcbindir create_srcobjdir create_srcavrobjdir create_testbindir create_testbuilddir \
 clean
 
