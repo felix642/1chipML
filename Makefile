@@ -1,22 +1,163 @@
-CC=gcc
+# Change this section as needed
+# target microcontroller unit.
+MCU ?= atmega328p # (Arduino UNO)
+CLOCK_FREQUENCY ?= 16000000 # 16Mhz clock frequency (Arduino UNO)
+DEBUG ?= 1
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation
+# the default build target executable:
+TARGET ?= gauss_elimination
 
-test: all run_all_tests
+# the compiler: gcc for C program
+GCC = gcc
+AVRGCC = avr-gcc
 
-linear_congruential_random_generator:
-	$(CC) ./tests/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_linear_congruential_random_generator.out
+# helpers
+AVRSIZE = avr-size
 
-gauss_elimination:
-	$(CC) ./tests/test_gauss_elimination.c ./src/gauss_elimination.c -lm -Wall -std=c99 -I./src -o test_gauss_elimination.out
+ifeq ($(DEBUG), 1)
+	CFLAGS += -g # adds debugging information
+endif
+CFLAGS += -Wall -Werror # turns on most compiler warnings
+CFLAGS += -std=c99 # C99
+CFLAGS += -MMD # Get header files dependencies
 
-poly_interpolation:
-	$(CC) ./tests/test_poly_interpolation.c ./src/poly_interpolation.c -lm -Wall -std=c99 -I./src -o test_poly_interpolation.out
+# avr compiler flags:
+AVRCFLAGS += $(CFLAGS)
+AVRCFLAGS += -ffunction-sections -fdata-sections # Required for -Wl and --gc-sections
+AVRCFLAGS += -Os # Optimize executable size before speed
+AVRCFLAGS += -DF_CPU=$(CLOCK_FREQUENCY) # clock frequency
+AVRCFLAGS += -flto -fno-fat-lto-objects # link time optimizer (LTO)
 
-run_all_tests:
-	./test_linear_congruential_random_generator.out
-	./test_gauss_elimination.out
-	./test_poly_interpolation.out
+# Preprocessor flags
+AVRCPPFLAGS += -mmcu=$(MCU) # target
+
+# Extra flags for the linker
+ifeq ($(DEBUG), 1)
+	AVRLDFLAGS += -g # adds debugging information
+endif
+AVRLDFLAGS += -mmcu=$(MCU) # target
+AVRLDFLAGS += -Wl,--gc-sections # reduce code size by cutting unused sections
+AVRLDFLAGS += -Os # Optimize executable size before speed
+AVRLDFLAGS += -flto -fuse-linker-plugin # Ensure that the library participates in the LTO optimization process
+
+# loaded libraries
+LDLIBS += -lm # Math library
+
+# src variables
+SRCDIR = src
+SRCBINDIR = $(SRCDIR)/bin
+SRCBUILDDIR = $(SRCDIR)/build
+SRCOBJDIR = $(SRCBUILDDIR)/gcc
+SRCAVROBJDIR = $(SRCBUILDDIR)/avrgcc
+
+SRCFILES = $(notdir $(wildcard $(SRCDIR)/*.c))
+DEPFILES = $(addprefix $(SRCOBJDIR)/, $(SRCFILES:.c=.d))
+AVRDEPFILES = $(addprefix $(SRCAVROBJDIR)/, $(SRCFILES:.c=.d))
+
+# test variables
+TESTDIR = tests
+TESTBINDIR = $(TESTDIR)/bin
+TESTBUILDDIR = $(TESTDIR)/build
+
+TESTSRCFILES = $(notdir $(wildcard $(TESTDIR)/*.c))
+TESTDEPFILES = $(addprefix $(TESTBUILDDIR)/, $(TESTSRCFILES:.c=.d))
+
+all: $(DEPFILES:.d=.o) $(AVRDEPFILES:.d=.o) $(TESTDEPFILES:.d=.o)
+
+validate: build verify
+
+# gcc commands
+build: $(SRCOBJDIR)/$(TARGET).o | create_srcbindir
+	$(GCC) $^ -o $(SRCBINDIR)/$(TARGET) $(LDLIBS)
+
+# default rule for gcc object files
+$(SRCOBJDIR)/%.o: $(SRCDIR)/%.c | create_srcobjdir
+	$(GCC) -c $(CFLAGS) $< -o $@
+
+
+# avr specific commands
+verify: $(SRCAVROBJDIR)/$(TARGET).o | create_srcbindir
+	$(AVRGCC) $(AVRLDFLAGS) $^ -o $(SRCBINDIR)/$(TARGET).elf $(LDLIBS)
+	$(AVRSIZE) -C --mcu=$(MCU) $(SRCBINDIR)/$(TARGET).elf
+
+# default rule for avrgcc object files
+$(SRCAVROBJDIR)/%.o: $(SRCDIR)/%.c | create_srcavrobjdir
+	$(AVRGCC) -c $(AVRCFLAGS) $(AVRCPPFLAGS) $< -o $@
+
+
+
+
+# test section
+test: test_linear_congruential_random_generator test_gauss_elimination test_poly_interpolation
+	$(TESTBINDIR)/test_linear_congruential_random_generator.out
+	$(TESTBINDIR)/test_gauss_elimination.out
+	$(TESTBINDIR)/test_poly_interpolation.out
+
+test_linear_congruential_random_generator: $(TESTBUILDDIR)/test_linear_congruential_random_generator.o $(SRCOBJDIR)/linear_congruential_random_generator.o | create_testbindir
+	$(GCC) $^ -o $(TESTBINDIR)/test_linear_congruential_random_generator.out $(LDLIBS)
+
+test_gauss_elimination: $(TESTBUILDDIR)/test_gauss_elimination.o $(SRCOBJDIR)/gauss_elimination.o | create_testbindir
+	$(GCC) $^ -o $(TESTBINDIR)/test_gauss_elimination.out $(LDLIBS)
+
+test_poly_interpolation: $(TESTBUILDDIR)/test_poly_interpolation.o $(SRCOBJDIR)/poly_interpolation.o | create_testbindir
+	$(GCC) $^ -o $(TESTBINDIR)/test_poly_interpolation.out $(LDLIBS)
+
+# default rule for all test object files
+$(TESTBUILDDIR)/%.o: $(TESTDIR)/%.c | create_testbuilddir
+	$(GCC) -c $(CFLAGS) $< -o $@
+
+
+
+# include dependencies
+-include $(DEPFILES)
+-include $(AVRDEPFILES)
+-include $(TESTDEPFILES)
+
+create_srcbindir:
+	@(mkdir -p $(SRCBINDIR))
+
+create_srcobjdir:
+	@(mkdir -p $(SRCOBJDIR))
+
+create_srcavrobjdir:
+	@(mkdir -p $(SRCAVROBJDIR))
+
+create_testbindir:
+	@(mkdir -p $(TESTBINDIR))
+
+create_testbuilddir:
+	@(mkdir -p $(TESTBUILDDIR))
 
 clean:
-	rm -rf test_*.out
+	@(rm -rf $(SRCBUILDDIR))
+	@(rm -rf $(SRCBINDIR))
+	@(rm -rf $(TESTBUILDDIR))
+	@(rm -rf $(TESTBINDIR))
+
+.PHONY: validate build verify \
+create_srcbindir create_srcobjdir create_srcavrobjdir create_testbindir create_testbuilddir \
+clean
+
+
+
+
+# all: linear_congruential_random_generator gauss_elimination poly_interpolation
+# 
+# test: all run_all_tests
+# 
+# linear_congruential_random_generator:
+# 	gcc ./tests/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c -lm -Wall -std=c99 -I./src -o test_linear_congruential_random_generator.out
+# 
+# gauss_elimination:
+# 	gcc ./tests/test_gauss_elimination.c ./src/gauss_elimination.c -lm -Wall -std=c99 -I./src -o test_gauss_elimination.out
+# 
+# poly_interpolation:
+# 	gcc ./tests/test_poly_interpolation.c ./src/poly_interpolation.c -lm -Wall -std=c99 -I./src -o test_poly_interpolation.out
+# 
+# run_all_tests:
+# 	./test_linear_congruential_random_generator.out
+# 	./test_gauss_elimination.out
+# 	./test_poly_interpolation.out
+# 
+# clean:
+# 	rm -rf test_*.out
