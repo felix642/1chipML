@@ -1,6 +1,6 @@
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 double myFunction(double x);
 void monteCarloEstimateSTD(double lowBound, double upBound, int iterations, double mcStats[]);
@@ -51,7 +51,7 @@ void monteCarloEstimateSTD(double lowBound, double upBound, int iterations, doub
 	while (iter<iterations-1)
 	{
 
-		double randNum = lowBound + (float(rand())/RAND_MAX) * (upBound-lowBound);
+		double randNum = lowBound + (float)rand() / RAND_MAX * (upBound-lowBound);
 
 		double functionVal = myFunction(randNum);
 

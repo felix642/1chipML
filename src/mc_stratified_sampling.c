@@ -1,6 +1,6 @@
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 double myFunction(double x);
 void monteCarloEstimateSTD(double lowBound, double upBound, int iterations, double mcStats[]);
@@ -64,7 +64,7 @@ void monteCarloEstimateSTD(double lowBound, double upBound, int iterations, doub
 	while (iter<iterations-1)
 	{
 
-		double randNum = lowBound + (float(rand())/RAND_MAX) * (upBound-lowBound);
+		double randNum = lowBound + (float)rand() / RAND_MAX * (upBound-lowBound);
 
 		double functionVal = myFunction(randNum);
 
@@ -96,7 +96,7 @@ void monteCarloEstimateStrat(double lowBound, double upBound, int iterations, do
 	int iter;
 
 	//Divide the local iterations amoung the subdomains
-	iterations = int( float(iterations)/subdomains);
+	iterations = (int) ((float)iterations/subdomains);
 
 	for(int i = 0;i<subdomains;i++)
 	{
@@ -105,7 +105,7 @@ void monteCarloEstimateStrat(double lowBound, double upBound, int iterations, do
 	}
 
 	//Amount of change the range by each time
-	double increment = (upBound-lowBound)/float(subdomains);
+	double increment = (upBound-lowBound)/(float)subdomains;
 
 	for(int seg = 0;seg<subdomains;seg++)
 	{
@@ -120,7 +120,7 @@ void monteCarloEstimateStrat(double lowBound, double upBound, int iterations, do
 		while (iter<iterations-1)
 		{
 
-			randNum = startRange + (float(rand())/RAND_MAX) * increment;
+			randNum = startRange + (float)rand() / RAND_MAX * increment;
 			functionVal = myFunction(randNum);
 
 			totalSum[seg] += functionVal;
