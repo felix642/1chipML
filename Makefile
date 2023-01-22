@@ -21,10 +21,17 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+lanczos:
+	$(CC) ./tests/test_lanczos.c ./src/lanczos.c -I./src -lm -Wall -std=c99 -Os -o test_lanczos.out
+
+lanczos:
+	$(CC) ./tests/test_lanczos.c ./src/lanczos.c -I./src -lm -Wall -std=c99 -Os -o test_lanczos.out
+
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
+	./test_lanczos.out
 
 clean:
 	rm -rf test_*.out
