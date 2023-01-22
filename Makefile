@@ -29,6 +29,9 @@ jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 lanczos: ./tests/test_lanczos.c ./src/lanczos.c -I./src | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+lanczos:
+	$(CC) ./tests/test_lanczos.c ./src/lanczos.c -I./src -lm -Wall -std=c99 -Os -o test_lanczos.out
+
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out

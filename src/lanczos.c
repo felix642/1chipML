@@ -12,8 +12,9 @@
  *  The number of column of the first matrix
  *  The number of column of the second matrix
  */
-void matrixMultiply(lanczos_real* firstMatrix, lanczos_real* secondMatrix,
-                    uint_least8_t size[3], lanczos_real* output) {
+static void matrixMultiply(lanczos_real* firstMatrix,
+                           lanczos_real* secondMatrix, uint_least8_t size[3],
+                           lanczos_real* output) {
   for (uint_least8_t i = 0; i < size[0]; ++i) {
     for (uint_least8_t j = 0; j < size[2]; ++j) {
       output[i * size[2] + j] = 0;
