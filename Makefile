@@ -26,6 +26,9 @@ poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interp
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+lanczos: ./tests/test_lanczos.c ./src/lanczos.c -I./src | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
