@@ -34,22 +34,28 @@ LDFLAGS += -flto -fuse-linker-plugin # Ensure that the library participates in t
 # loaded libraries
 LDLIBS += -lm # Math library
 
+OBJDIR = obj
+
 # the build target executable:
 VERIFY_TARGET = gauss_elimination
 
 test:
-	$(AVRGCC) --version
+	@echo test
 
-verify: $(VERIFY_TARGET).o
+verify: $(OBJDIR)/$(VERIFY_TARGET).o | directories
 	$(AVRGCC) $(LDFLAGS) $^ -o $(VERIFY_TARGET).elf $(LDLIBS)
 	$(AVRSIZE) -C -x --mcu=$(MCU) $(VERIFY_TARGET).elf
 
-$(VERIFY_TARGET).o: $(VERIFY_TARGET).c $(VERIFY_TARGET).h
+#$(OBJDIR)/gauss_elimination.o: gauss_elimination.c gauss_elimination.h | directories
+#	$(AVRGCC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+# rule for all files with the same header name as the source name
+$(OBJDIR)/%.o: %.c %.h | directories
 	$(AVRGCC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-gauss_elimination.o: gauss_elimination.c gauss_elimination.h
-	$(AVRGCC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+directories:
+	mkdir -p $(OBJDIR)
 
 clean:
-	rm -rf *.o
+	rm -rf $(OBJDIR)
 	rm -rf *.elf
