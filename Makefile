@@ -89,18 +89,18 @@ $(SRCAVROBJDIR)/%.o: $(SRCDIR)/%.c | create_srcavrobjdir
 
 # test section
 test: test_linear_congruential_random_generator test_gauss_elimination test_poly_interpolation
-	$(TESTBINDIR)/test_linear_congruential_random_generator.out
-	$(TESTBINDIR)/test_gauss_elimination.out
-	$(TESTBINDIR)/test_poly_interpolation.out
+	$(TESTBINDIR)/test_linear_congruential_random_generator
+	$(TESTBINDIR)/test_gauss_elimination
+	$(TESTBINDIR)/test_poly_interpolation
 
 test_linear_congruential_random_generator: $(TESTBUILDDIR)/test_linear_congruential_random_generator.o $(SRCOBJDIR)/linear_congruential_random_generator.o | create_testbindir
-	$(GCC) $^ -o $(TESTBINDIR)/test_linear_congruential_random_generator.out $(LDLIBS)
+	$(GCC) $^ -o $(TESTBINDIR)/test_linear_congruential_random_generator $(LDLIBS)
 
 test_gauss_elimination: $(TESTBUILDDIR)/test_gauss_elimination.o $(SRCOBJDIR)/gauss_elimination.o | create_testbindir
-	$(GCC) $^ -o $(TESTBINDIR)/test_gauss_elimination.out $(LDLIBS)
+	$(GCC) $^ -o $(TESTBINDIR)/test_gauss_elimination $(LDLIBS)
 
 test_poly_interpolation: $(TESTBUILDDIR)/test_poly_interpolation.o $(SRCOBJDIR)/poly_interpolation.o | create_testbindir
-	$(GCC) $^ -o $(TESTBINDIR)/test_poly_interpolation.out $(LDLIBS)
+	$(GCC) $^ -o $(TESTBINDIR)/test_poly_interpolation $(LDLIBS)
 
 # default rule for all test object files
 $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.c | create_testbuilddir
