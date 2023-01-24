@@ -38,7 +38,7 @@ IndentWidth:     2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 MaxEmptyLinesToKeep: 1
-PointerAlignment: Middle
+PointerAlignment: Left
 ReflowComments:  true
 SortIncludes:    true
 SpaceBeforeAssignmentOperators: true

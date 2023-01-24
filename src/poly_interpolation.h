@@ -33,6 +33,6 @@
  *	0 as success, and -1 as error.
  */
 int poly_interpolation(poly_real x_a[], poly_real y_a[], unsigned int n,
-                       poly_real x, poly_real * y, poly_real * error);
+                       poly_real x, poly_real* y, poly_real* error);
 
 /* -- End of file -- */
