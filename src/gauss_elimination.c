@@ -6,8 +6,8 @@
    to solve a system of n linear equations of the type matrix_a*x=vector_b.
    Inputs: n, matrix_a[][], vector_b[].
    Outputs: pointer to the solution array x[] */
-gauss_real * gauss_elimination(int n, gauss_real ** matrix_a,
-                               gauss_real * vector_b) {
+gauss_real* gauss_elimination(int n, gauss_real** matrix_a,
+                              gauss_real* vector_b) {
 
   /* Variables and pointers declarations */
   int i, j, k;
@@ -16,16 +16,16 @@ gauss_real * gauss_elimination(int n, gauss_real ** matrix_a,
   int indx;
   int count = 0;
   gauss_real r;
-  gauss_real * x;
-  gauss_real * tmp;
-  gauss_real ** a;
+  gauss_real* x;
+  gauss_real* tmp;
+  gauss_real** a;
 
   /* Memory allocation */
-  a = (gauss_real **)malloc(n * sizeof(gauss_real *));
+  a = (gauss_real**)malloc(n * sizeof(gauss_real*));
   for (i = 0; i < n; i++)
-    a[i] = (gauss_real *)malloc((n + 1) * sizeof(gauss_real));
+    a[i] = (gauss_real*)malloc((n + 1) * sizeof(gauss_real));
 
-  x = (gauss_real *)malloc(n * sizeof(gauss_real));
+  x = (gauss_real*)malloc(n * sizeof(gauss_real));
 
   /* Load the matrix a[][], the matrix a[][] is an n*(n+1) matrix which reads
    * [matrix_a, matrix_b] */

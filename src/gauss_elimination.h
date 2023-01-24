@@ -11,7 +11,7 @@
 #define gauss_real double
 
 /* Functions are declared below */
-gauss_real * gauss_elimination(int n, gauss_real ** matrix_a,
-                               gauss_real * vector_b);
+gauss_real* gauss_elimination(int n, gauss_real** matrix_a,
+                              gauss_real* vector_b);
 
 /* -- End of file -- */

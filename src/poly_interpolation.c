@@ -7,17 +7,17 @@
   using Neville's algorithm.
   */
 int poly_interpolation(poly_real x_a[], poly_real y_a[], unsigned int n,
-                       poly_real x, poly_real * y, poly_real * error) {
+                       poly_real x, poly_real* y, poly_real* error) {
   unsigned int nearest_index = 0;
 
   /* Change input arrays to unit-offset. */
-  poly_real * px_a = x_a - 1;
-  poly_real * py_a = y_a - 1;
+  poly_real* px_a = x_a - 1;
+  poly_real* py_a = y_a - 1;
 
   /* Create c and d vector to calculate differences c and d between
     2 parents and 1 child. */
-  poly_real * c = (poly_real *)malloc((n + 1) * sizeof(poly_real));
-  poly_real * d = (poly_real *)malloc((n + 1) * sizeof(poly_real));
+  poly_real* c = (poly_real*)malloc((n + 1) * sizeof(poly_real));
+  poly_real* d = (poly_real*)malloc((n + 1) * sizeof(poly_real));
 
   /* Set the index as boundary if it is an extrapolation problem. */
   if (x <= px_a[1]) {
