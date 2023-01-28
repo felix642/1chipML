@@ -1,6 +1,10 @@
+DEBUG ?= 0
+
 CC=gcc
 
-CFLAGS += -g # adds debugging information
+ifeq ($(DEBUG), 1)
+	CFLAGS += -g # adds debugging information
+endif
 CFLAGS += -Wall # turns on most compiler warnings
 CFLAGS += -std=c99 # C99
 CFLAGS += -I./src # included header files
