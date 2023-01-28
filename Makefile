@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation
+all: linear_congruential_random_generator gauss_elimination poly_interpolation FFT
 
 test: all run_all_tests
 
@@ -30,6 +30,7 @@ run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
+	./test_FFT.out
 
 clean:
 	rm -rf test_*.out
