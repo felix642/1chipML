@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stdlib.h>
+#ifndef ONECHIPML_FFT
+#define ONECHIPML_FFT
 
 #define fft_real double
 
@@ -16,3 +16,5 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // ONECHIPML_FFT

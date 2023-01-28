@@ -1,4 +1,6 @@
 #include "FFT.h"
+#include <math.h>
+#include <stdlib.h>
 
 static void bitReversal(unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
   
