@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation
+all: linear_congruential_random_generator gauss_elimination poly_interpolation jacobi
 
 test: all run_all_tests
 
@@ -19,6 +19,9 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+
+jacobi: ./tests/test_jacobi.c ./src/jacobi.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
