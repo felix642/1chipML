@@ -1,5 +1,6 @@
 CC=gcc
-BUILD_FOLDER = build
+TEST_FOLDER = tests
+BUILD_FOLDER = $(TEST_FOLDER)/build
 
 CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
@@ -13,13 +14,13 @@ all: build_folder linear_congruential_random_generator gauss_elimination poly_in
 
 test: all run_all_tests
 
-linear_congruential_random_generator: ./tests/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c
+linear_congruential_random_generator: ./$(TEST_FOLDER)/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
+gauss_elimination: ./$(TEST_FOLDER)/test_gauss_elimination.c ./src/gauss_elimination.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
+poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interpolation.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 jacobi: ./tests/test_jacobi.c ./src/jacobi.c
