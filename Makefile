@@ -21,9 +21,6 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-multi_arm_bandit: ./tests/test_multi_arm_bandit.c ./src/multi_arm_bandit.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
-
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
