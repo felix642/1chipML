@@ -4,10 +4,10 @@
 
 typedef struct Bandit {
     unsigned int nArms;
-    double* probsOfSuccess;
-    double* armsMeanReward;
+    bandit_real* probsOfSuccess;
+    bandit_real* armsMeanReward;
     unsigned int* armsStep;
-    double epsilon;
+    bandit_real epsilon;
 } Bandit;
 
 static unsigned int getChosenArm(const Bandit* const bandit, const unsigned int iteration) {
@@ -16,7 +16,7 @@ static unsigned int getChosenArm(const Bandit* const bandit, const unsigned int 
         return rand() % bandit->nArms;
     }
 
-    const double explore = (double)rand() / (double)RAND_MAX;
+    const bandit_real explore = (bandit_real)rand() / (bandit_real)RAND_MAX;
     if (explore < bandit->epsilon) {
         return rand() % bandit->nArms;
     }
@@ -31,37 +31,38 @@ static unsigned int getChosenArm(const Bandit* const bandit, const unsigned int 
     return maxIndex;
 }
 
-static double playArm(const unsigned int arm, Bandit* bandit) {
-    // stochastic reward
-    double rewardChance = (double)rand() / (double)RAND_MAX;
+static bandit_real playArm(const unsigned int arm, Bandit* bandit) {
+    // TODO: Modify
+
+    bandit_real rewardChance = (bandit_real)rand() / (bandit_real)RAND_MAX;
     if (rewardChance < bandit->probsOfSuccess[arm]) {
         return 1.0;
     }
     return 0.0;
 }
 
-static void updateArmResults(const double reward, const unsigned int arm, Bandit* bandit) {
+static void updateArmResults(const bandit_real reward, const unsigned int arm, Bandit* bandit) {
     ++(bandit->armsStep[arm]);
     bandit->armsMeanReward[arm] += (reward - bandit->armsMeanReward[arm]) / bandit->armsStep[arm];
 }
 
 // passing single function
-double test(double (*rewardFunction)(void)) {
+bandit_real test(bandit_real (*rewardFunction)(void)) {
     printf("passing func as arg: %f \n", rewardFunction());
     return 0.0;
 }
 
 // passing multiple functions
-double test2(double (**rewardFunctions)(void)) {
+bandit_real test2(bandit_real (**rewardFunctions)(void)) {
     printf("passing array of func as arg: %f \n", rewardFunctions[0]());
     return 0.0;
 }
 
-double multiArmBandit(const unsigned int nArms, double* probs, const double epsilon, const unsigned int nIterations) {
+bandit_real multiArmBandit(const unsigned int nArms, bandit_real* probs, const bandit_real epsilon, const unsigned int nIterations) {
 
     srand(0);
 
-    double armsMeanReward[nArms];
+    bandit_real armsMeanReward[nArms];
     unsigned int armsStep[nArms];
     Bandit bandit = {
         nArms,
@@ -73,7 +74,7 @@ double multiArmBandit(const unsigned int nArms, double* probs, const double epsi
 
     for(unsigned int i = 0; i < nIterations; ++i) {
         unsigned int arm = getChosenArm(&bandit, i);
-        double reward = playArm(arm, &bandit);
+        bandit_real reward = playArm(arm, &bandit);
         updateArmResults(reward, arm, &bandit);
     }
 
@@ -86,7 +87,7 @@ double multiArmBandit(const unsigned int nArms, double* probs, const double epsi
         }
     }
     
-    double bestResult = bandit.armsMeanReward[bestResultIndex];
+    bandit_real bestResult = bandit.armsMeanReward[bestResultIndex];
     printf("Best result: %f\n", bestResult);
     printf("Best index: %d\n", bestResultIndex);
 

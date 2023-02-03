@@ -7,11 +7,13 @@
 extern "C" {
 #endif
 
-typedef double (*rewardFunctionType)(void);
+// a function that takes no arguments and returns a bandit_real
+typedef bandit_real (*rewardFunctionType)(void);
 
-double test(double (*rewardFunction)(void));
-double test2(double (**rewardFunctions)(void));
-double multiArmBandit(const unsigned int nArms, double* probs, const double epsilon, const unsigned int nIterations);
+bandit_real test(bandit_real (*rewardFunction)(void));
+bandit_real test2(bandit_real (**rewardFunctions)(void));
+bandit_real multiArmBandit(const unsigned int nArms, bandit_real* probs, const bandit_real epsilon, const unsigned int nIterations);
+bandit_real multiArmBanditFunc(const unsigned int nArms, rewardFunctionType* probs, const bandit_real epsilon, const unsigned int nIterations);
 
 #ifdef __cplusplus
 }
