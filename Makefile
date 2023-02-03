@@ -23,8 +23,8 @@ gauss_elimination: ./$(TEST_FOLDER)/test_gauss_elimination.c ./src/gauss_elimina
 poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interpolation.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-jacobi: ./tests/test_jacobi.c ./src/jacobi.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out

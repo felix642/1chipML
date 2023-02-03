@@ -1,2 +1,7 @@
 local/*
+<<<<<<< HEAD
 tests/build*
+=======
+tests/build*
+.vscode
+>>>>>>> c525852 (first implementation of jacobi)
