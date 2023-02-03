@@ -57,7 +57,6 @@ static void randomTesting() {
 }
 
 static void knownTesting() {
-  // limit length to 8 for faster testing
   unsigned length = 4;
 
   // allocate arrays for testing
