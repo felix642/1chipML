@@ -32,10 +32,10 @@ poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interp
 gradient_descent: ./$(TEST_FOLDER)/test_gradient_descent.c ./src/gradient_descent.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c
+monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c
+jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
