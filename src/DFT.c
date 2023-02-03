@@ -1,7 +1,7 @@
 #include "DFT.h"
 #include <math.h>
 #include <stdlib.h>
-#include <string.h> // for memset
+#include <string.h>
 
 /**
  * @param length The length of the input vectors.
@@ -15,8 +15,8 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray) {
 
   dft_real outputReals[length];
   dft_real outputImaginaries[length];
-  memset(outputReals, 0.0, length * sizeof(dft_real));
-  memset(outputReals, 0.0, length * sizeof(dft_real));
+  memset(outputReals, 0, length * sizeof(dft_real));
+  memset(outputReals, 0, length * sizeof(dft_real));
 
   for (unsigned i = 0; i < length; ++i) {
     dft_real exponentBase = -2.0 * M_PI * (dft_real)i / (dft_real)length;
@@ -29,8 +29,6 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray) {
   }
 
   // place result in arrays
-  for (unsigned i = 0; i < length; ++i) {
-    realArray[i] = outputReals[i];
-    imaginaryArray[i] = outputImaginaries[i];
-  }
+  memcpy(realArray, outputReals, length * sizeof(dft_real));
+  memcpy(imaginaryArray, outputImaginaries, length * sizeof(dft_real));
 }

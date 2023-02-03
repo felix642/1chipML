@@ -26,14 +26,16 @@ static void randomTesting() {
   unsigned length = (unsigned)pow(2, rand() % 9);
 
   // allocate arrays for testing
-  fft_real* fftReals = calloc(length, sizeof(fft_real));
-  fft_real* fftImgs = calloc(length, sizeof(fft_real));
-  fft_real* dftReals = calloc(length, sizeof(fft_real));
-  fft_real* dftImgs = calloc(length, sizeof(fft_real));
+  fft_real* fftReals = malloc(length * sizeof(fft_real));
+  fft_real* fftImgs = malloc(length * sizeof(fft_real));
+  fft_real* dftReals = malloc(length * sizeof(fft_real));
+  fft_real* dftImgs = malloc(length * sizeof(fft_real));
 
   for (unsigned i = 0; i < length; ++i) {
     fftReals[i] = (float)rand() / RAND_MAX;
+    fftImgs[i] = 0;
     dftReals[i] = fftReals[i];
+    dftImgs[i] = fftImgs[i];
   }
 
   FFT(length, fftReals, fftImgs);
@@ -59,25 +61,10 @@ static void knownTesting() {
   unsigned length = 4;
 
   // allocate arrays for testing
-  fft_real* fftReals = calloc(length, sizeof(fft_real));
-  fft_real* fftImgs = calloc(length, sizeof(fft_real));
-  fft_real* dftReals = calloc(length, sizeof(fft_real));
-  fft_real* dftImgs = calloc(length, sizeof(fft_real));
-
-  fftReals[0] = 8;
-  fftReals[1] = 4;
-  fftReals[2] = 8;
-  fftReals[3] = 0;
-
-  dftReals[0] = 20;
-  dftReals[1] = 0;
-  dftReals[2] = 12;
-  dftReals[3] = 0;
-
-  dftImgs[0] = 0;
-  dftImgs[1] = -4;
-  dftImgs[2] = 0;
-  dftImgs[3] = 4;
+  fft_real fftReals[] = {8, 4, 8, 0};
+  fft_real fftImgs[] = {0, 0, 0, 0};
+  fft_real dftReals[] = {20, 0, 12, 0};
+  fft_real dftImgs[] = {0, -4, 0, 4};
 
   FFT(length, fftReals, fftImgs);
   printf("FFT output:\n");
@@ -93,11 +80,6 @@ static void knownTesting() {
   else
     printf("false\n");
 
-  // free remaining memory
-  free(fftReals);
-  free(fftImgs);
-  free(dftReals);
-  free(dftImgs);
 }
 
 int main() {

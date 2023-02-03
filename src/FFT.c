@@ -26,7 +26,7 @@ static void bitReversal(unsigned length, fft_real* realArray, fft_real* imaginar
   }
 }
 
-static int isPowerOfTwo(const unsigned value) {
+static inline int isPowerOfTwo(const unsigned value) {
   return (value != 0) && ((value & (value - 1)) == 0);
 }
 
