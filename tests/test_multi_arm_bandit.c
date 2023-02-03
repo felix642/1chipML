@@ -2,8 +2,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+bandit_real myFunction() {
+    return 2.3456;
+} 
+
 int main() {
 
+    rewardFunctionType functions[] = {myFunction};
+
+    test(myFunction);
+    test2(functions);
     printf("multiArmBanditMain called\n");
     
     unsigned arms = 10;

@@ -45,11 +45,21 @@ static void updateArmResults(const double reward, const unsigned int arm, Bandit
     bandit->armsMeanReward[arm] += (reward - bandit->armsMeanReward[arm]) / bandit->armsStep[arm];
 }
 
+// passing single function
+double test(double (*rewardFunction)(void)) {
+    printf("passing func as arg: %f \n", rewardFunction());
+    return 0.0;
+}
+
+// passing multiple functions
+double test2(double (**rewardFunctions)(void)) {
+    printf("passing array of func as arg: %f \n", rewardFunctions[0]());
+    return 0.0;
+}
+
 double multiArmBandit(const unsigned int nArms, double* probs, const double epsilon, const unsigned int nIterations) {
 
     srand(0);
-
-
 
     double armsMeanReward[nArms];
     unsigned int armsStep[nArms];

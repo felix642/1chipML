@@ -7,6 +7,10 @@
 extern "C" {
 #endif
 
+typedef double (*rewardFunctionType)(void);
+
+double test(double (*rewardFunction)(void));
+double test2(double (**rewardFunctions)(void));
 double multiArmBandit(const unsigned int nArms, double* probs, const double epsilon, const unsigned int nIterations);
 
 #ifdef __cplusplus
