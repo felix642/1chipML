@@ -1,34 +1,10 @@
-#include "../src/FFT.h"
+#include <1chipml.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 
 // Golden model
-static void DFT(const unsigned length, fft_real* incomingReals, fft_real* incomingImaginaries) {
-
-  fft_real* outputReals = calloc(length, sizeof(fft_real));
-  fft_real* outputImaginaries = calloc(length, sizeof(fft_real));
-
-  for (unsigned i = 0; i < length; ++i) {
-    fft_real exponentBase = -2.0 * M_PI * (fft_real)i / (fft_real)length;
-    for (unsigned k = 0; k < length; ++k) {
-      fft_real wCos = cos(k * exponentBase); // real part
-      fft_real wSin = sin(k * exponentBase); // imaginary part
-      outputReals[i] += (incomingReals[k] * wCos - incomingImaginaries[k] * wSin); // real
-      outputImaginaries[i] += (incomingReals[k] * wSin + incomingImaginaries[k] * wCos); // imaginary
-    }
-  }
-
-  for (unsigned i = 0; i < length; ++i) {
-    incomingReals[i] = outputReals[i];
-    incomingImaginaries[i] = outputImaginaries[i];
-  }
-
-  free(outputReals);
-  free(outputImaginaries);
-}
-
 static int compareFT(const unsigned length, fft_real* incomingReals, 
   fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
 

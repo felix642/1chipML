@@ -21,8 +21,8 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-FFT:
-	$(CC) ./tests/test_FFT.c ./src/FFT.c -lm -Wall -std=c99 -I./src -o test_FFT.out
+FFT: ./tests/test_FFT.c ./src/FFT.c ./src/DFT.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 
 
