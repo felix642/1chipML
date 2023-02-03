@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory gradient_descent
+all: linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory gradient_descent monte_carlo
 
 test: all run_all_tests
 
@@ -30,6 +30,9 @@ poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 gradient_descent: ./tests/test_gradient_descent.c ./src/gradient_descent.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+monte_carlo: ./tests/test_monte_carlo.c ./src/monte_carlo.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
@@ -37,6 +40,7 @@ run_all_tests:
 	./test_gradient_descent.out
 	./test_genetic.out
 	./test_genetic_low_memory.out
+	./test_monte_carlo.out
 
 clean:
 	rm -rf test_*.out
