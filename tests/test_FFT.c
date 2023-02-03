@@ -1,9 +1,13 @@
-#include <1chipml.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 
+// project includes
+#include <1chipml.h>
+#include "bitmap.h"
+
+// Golden model
 static int compareFT(const unsigned length, fft_real* incomingReals, 
   fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
 
@@ -141,6 +145,25 @@ static void knownTestingFFTI() {
 }
 
 int main() {
+
+  int height = 400;
+  int width = 400;
+  unsigned char image[height][width][BYTES_PER_PIXEL];
+  char* imageFileName = (char*) "bitmapImage.bmp";
+
+  int i, j;
+  for (i = 0; i < height; i++) {
+      for (j = 0; j < width; j++) {
+          image[i][j][2] = (unsigned char) ( i * 255 / height );             ///red
+          image[i][j][1] = (unsigned char) ( j * 255 / width );              ///green
+          image[i][j][0] = (unsigned char) ( (i+j) * 255 / (height+width) ); ///blue
+      }
+  }
+
+  generateBitmapImage((unsigned char*) image, height, width, imageFileName);
+  printf("Image generated!!");
+
+  return 0;
 
   int seed = time(NULL);
   printf("seed used : %d\n", seed);
