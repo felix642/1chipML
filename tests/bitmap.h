@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-void generateBitmapImage (unsigned char* image, int height, int width, char* imageFileName);
+void generateBitmapImage(unsigned char* image, const unsigned int height, const unsigned int width, char* imageFileName);
 
 #ifdef __cplusplus
 }
