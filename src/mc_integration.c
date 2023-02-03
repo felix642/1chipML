@@ -1,6 +1,6 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
 
 double myFunction(double x);
 double monteCarloEstimate(double lowBound, double upBound, int iterations);
