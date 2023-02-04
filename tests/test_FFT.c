@@ -20,16 +20,16 @@ static int compareFT(const unsigned length, fft_real* incomingReals,
   return 1;
 }
 
-static void randomTesting() {
+static void randomTestingFFT() {
 
   // limit length to 8 for faster testing
   unsigned length = (unsigned)pow(2, rand() % 9);
 
   // allocate arrays for testing
-  fft_real* fftReals = malloc(length * sizeof(fft_real));
-  fft_real* fftImgs = malloc(length * sizeof(fft_real));
-  fft_real* dftReals = malloc(length * sizeof(fft_real));
-  fft_real* dftImgs = malloc(length * sizeof(fft_real));
+  fft_real fftReals[length];
+  fft_real fftImgs[length];
+  fft_real dftReals[length];
+  fft_real dftImgs[length];
 
   for (unsigned i = 0; i < length; ++i) {
     fftReals[i] = (float)rand() / RAND_MAX;
@@ -38,25 +38,51 @@ static void randomTesting() {
     dftImgs[i] = fftImgs[i];
   }
 
-  FFT(length, fftReals, fftImgs);
+  FFT(length, fftReals, fftImgs, 1);
   DFT(length, dftReals, dftImgs);
   
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
   
-  printf("Random testing: is the FFT working as intended? ");
+  printf("Random testing FFT: is the FFT working as intended? ");
   if (isSimilar)
     printf("true\n");
   else
     printf("false\n");
-
-  // free remaining memory
-  free(fftReals);
-  free(fftImgs);
-  free(dftReals);
-  free(dftImgs);
+  
 }
 
-static void knownTesting() {
+static void randomTestingFFTI() {
+
+  // limit length to 8 for faster testing
+  unsigned length = (unsigned)pow(2, rand() % 9);
+
+  // allocate arrays for testing
+  fft_real reals[length];
+  fft_real imgs[length];
+  fft_real fftReals[length];
+  fft_real fftImgs[length];
+
+  for (unsigned i = 0; i < length; ++i) {
+    reals[i] = (float)rand() / RAND_MAX;
+    imgs[i] = 0;
+    fftReals[i] = reals[i];
+    fftImgs[i] = imgs[i];
+  }
+
+  DFT(length, fftReals, fftImgs);
+  FFT(length, fftReals, fftImgs, -1);
+  
+  int isSimilar = compareFT(length, reals, imgs, fftReals, fftImgs);
+  
+  printf("Random testing inverse FFT: is the FFT working as intended? ");
+  if (isSimilar)
+    printf("true\n");
+  else
+    printf("false\n");
+  
+}
+
+static void knownTestingFFT() {
   unsigned length = 4;
 
   // allocate arrays for testing
@@ -65,7 +91,7 @@ static void knownTesting() {
   fft_real dftReals[] = {20, 0, 12, 0};
   fft_real dftImgs[] = {0, -4, 0, 4};
 
-  FFT(length, fftReals, fftImgs);
+  FFT(length, fftReals, fftImgs, 1);
   printf("FFT output:\n");
   for (unsigned i = 0; i < length; ++i) {
     printf("real: %f , img: %f\n", fftReals[i], fftImgs[i]);
@@ -73,7 +99,28 @@ static void knownTesting() {
 
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
 
-  printf("Known testing: is the FFT working as intended? ");
+  printf("Known testing FFT: is the FFT working as intended? ");
+  if (isSimilar)
+    printf("true\n");
+  else
+    printf("false\n");
+
+}
+
+static void knownTestingFFTI() {
+  unsigned length = 4;
+
+  // allocate arrays for testing
+  fft_real dftReals[] = {8, 4, 8, 0};
+  fft_real dftImgs[] = {0, 0, 0, 0};
+  fft_real fftReals[] = {20, 0, 12, 0};
+  fft_real fftImgs[] = {0, -4, 0, 4};
+
+  FFT(length, fftReals, fftImgs, -1);
+
+  int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
+
+  printf("Known testing inverse FFT: is the FFT working as intended? ");
   if (isSimilar)
     printf("true\n");
   else
@@ -83,12 +130,14 @@ static void knownTesting() {
 
 int main() {
 
-  int seed = time(NULL);
+  int seed = 1675474412;//time(NULL);
   printf("seed used : %d\n", seed);
   srand(seed);
 
-  randomTesting();
-  knownTesting();
+  knownTestingFFT();
+  knownTestingFFTI();
+  randomTestingFFT();
+  randomTestingFFTI();
 
   return 0;
 }

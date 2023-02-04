@@ -37,12 +37,18 @@ static inline int isPowerOfTwo(const unsigned value) {
  * @param imaginaryArray 1D array containing the imaginary part of the incoming
  * vector. This array will contain the end result of the imaginary part of the
  * FFT
+ * @param dir Direction of the FFT. 1 for the FFT, -1 for the inverse FFT
  * @return 0 if an error occured, 1 otherwise
  *
  */
-int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
+int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, const int dir) {
   if (!isPowerOfTwo(length) || realArray == NULL || imaginaryArray == NULL) {
     return 0;
+  }
+
+  int thetaFactor = -1;
+  if (dir < 0) {
+    thetaFactor = 1;
   }
 
   bitReversal(length, realArray, imaginaryArray);
@@ -56,7 +62,7 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
     // factors for trigonometric recurrence formula
     fft_real wtempSin = sin(M_PI / depth);
     fft_real wRealFactor = -2.0 * wtempSin * wtempSin;
-    fft_real wImaginaryFactor = -sin(2.0 * M_PI / depth);
+    fft_real wImaginaryFactor = thetaFactor * sin(2.0 * M_PI / depth);
 
     fft_real wReal = 1.0;
     fft_real wImaginary = 0.0;
@@ -78,6 +84,14 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray) {
       fft_real wtempReal = wReal;
       wReal += wReal * wRealFactor - wImaginary * wImaginaryFactor;
       wImaginary += wImaginary * wRealFactor + wtempReal * wImaginaryFactor;
+    }
+  }
+
+  // inverse FFT
+  if (dir < 0) {
+    for (unsigned i = 0; i < length; ++i) {
+      realArray[i] /= length;
+      imaginaryArray[i] /= length;
     }
   }
 

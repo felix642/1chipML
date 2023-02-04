@@ -16,7 +16,7 @@ void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray) {
   dft_real outputReals[length];
   dft_real outputImaginaries[length];
   memset(outputReals, 0, length * sizeof(dft_real));
-  memset(outputReals, 0, length * sizeof(dft_real));
+  memset(outputImaginaries, 0, length * sizeof(dft_real));
 
   for (unsigned i = 0; i < length; ++i) {
     dft_real exponentBase = -2.0 * M_PI * (dft_real)i / (dft_real)length;

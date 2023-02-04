@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray);
+int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, const int dir);
 
 #ifdef __cplusplus
 }
