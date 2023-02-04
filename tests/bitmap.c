@@ -27,13 +27,13 @@ void writeBitmapHeader(const int height, const int width,
                        const int paddedWidthInBytes, FILE* imageFile) {
 
   const unsigned int imageSize = paddedWidthInBytes * height;
-  const unsigned int bfOffBits = FILE_HEADER_SIZE + INFO_HEADER_SIZE;
-  const unsigned int fileSize = bfOffBits + imageSize;
+  const unsigned int totalHeaderSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE;
+  const unsigned int fileSize = totalHeaderSize + imageSize;
 
   uint32_t largeHeaders[12] = {
-      fileSize, // filesize (bfSize)
-      0,        // reserved (bfReserved1 and bfReserved2)
-      bfOffBits, // start pixel of the array (bfOffBits)
+      fileSize,             // filesize (bfSize)
+      0,                    // reserved (bfReserved1 and bfReserved2)
+      totalHeaderSize,      // start pixel of the array (bfOffBits)
       INFO_HEADER_SIZE,     // bitmap info header size (biSize)
       width,                // image width (biWidth)
       height,               // image height (biHeight)
