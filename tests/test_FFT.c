@@ -37,8 +37,21 @@ static void randomTestingFFT() {
     dftImgs[i] = fftImgs[i];
   }
 
+  clock_t start, end;
+  double algorithmTime = 0.0;
+
+  // Algorithm time approximation
+  start = clock();
   FFT(length, fftReals, fftImgs, 1);
+  end = clock();
+  algorithmTime = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("The elapsed time for the FFT is %f seconds\n", algorithmTime);
+
+  start = clock();
   DFT(length, dftReals, dftImgs, 1);
+  end = clock();
+  algorithmTime = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("The elapsed time for the DFT is %f seconds\n", algorithmTime);
   
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
   
