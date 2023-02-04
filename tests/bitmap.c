@@ -2,53 +2,98 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void writeBitmapHeader(int height, int width, int stride, FILE* imageFile);
+typedef struct ImageProperties {
+  unsigned int height;
+  unsigned int width;
+  unsigned int paddingSize;
+  unsigned int bytesPerPixel;
+} ImageProperties;
 
-void generateBitmapImage(unsigned char* image, const unsigned int height,
-                         const unsigned int width, char* imageFileName) {
-  
-  const unsigned int widthInBytes = width * BYTES_PER_PIXEL;
-  const unsigned char padding[3] = {0, 0, 0};
-  const unsigned int paddingSize = (4 - widthInBytes % 4) % 4;
-  const unsigned int paddedWidthInBytes = (widthInBytes) + paddingSize;
+static void writeBitmapHeaderRGB(const ImageProperties properties, FILE* imageFile);
+static void writeBitmapHeaderGrey(const ImageProperties properties, FILE* imageFile);
+static void writeGenericHeader(const unsigned int numberOfColors, const ImageProperties properties, FILE* imageFile);
+static inline unsigned int getPaddingSize(const unsigned int width, const unsigned int bytesPerPixel);
+static void writeImageToFile(const unsigned char* image, const ImageProperties properties, FILE* imageFile);
+
+
+void generateBitmapImageRGB(unsigned char* image, const unsigned int height, const unsigned int width, char* imageFileName) {
+  const unsigned int paddingSize = getPaddingSize(width, RGB_BYTES);
+  ImageProperties imageProperties = {
+    height,
+    width,
+    paddingSize,
+    RGB_BYTES
+  };
 
   FILE* imageFile = fopen(imageFileName, "wb");
-  writeBitmapHeader(height, width, paddedWidthInBytes, imageFile);
-
-  for (unsigned int i = 0; i < height; ++i) {
-    fwrite(image + (i * widthInBytes), BYTES_PER_PIXEL, width, imageFile);
-    fwrite(padding, 1, paddingSize, imageFile);
-  }
-
+  writeBitmapHeaderRGB(imageProperties, imageFile);
+  writeImageToFile(image, imageProperties, imageFile);
   fclose(imageFile);
 }
 
-void writeBitmapHeader(const int height, const int width,
-                       const int paddedWidthInBytes, FILE* imageFile) {
+void generateBitmapImageGrey(unsigned char* image, const unsigned int height, const unsigned int width, char* imageFileName) {
+  const unsigned int paddingSize = getPaddingSize(width, GREY_BYTES);
+  ImageProperties imageProperties = {
+    height,
+    width,
+    paddingSize,
+    GREY_BYTES
+  };
 
-  const unsigned int imageSize = paddedWidthInBytes * height;
-  const unsigned int totalHeaderSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE;
+  FILE* imageFile = fopen(imageFileName, "wb");
+  writeBitmapHeaderGrey(imageProperties, imageFile);
+  writeImageToFile(image, imageProperties, imageFile);
+  fclose(imageFile);
+}
+
+static void writeBitmapHeaderRGB(const ImageProperties properties, FILE* imageFile) {
+
+  const unsigned int numberOfColors = 0; // default
+  writeGenericHeader(numberOfColors, properties, imageFile);
+}
+
+static void writeBitmapHeaderGrey(const ImageProperties properties, FILE* imageFile) {
+
+  const unsigned int numberOfColors = 256;
+  writeGenericHeader(numberOfColors, properties, imageFile);
+
+  // write the color palette for greyscale
+  for (unsigned int i = 0; i < numberOfColors; ++i) {
+    fprintf(imageFile, "%c", (unsigned char) i);
+    fprintf(imageFile, "%c", (unsigned char) i);
+    fprintf(imageFile, "%c", (unsigned char) i);
+    fprintf(imageFile, "%c", (unsigned char) 0);
+  }
+}
+
+static void writeGenericHeader(const unsigned int numberOfColors, const ImageProperties properties, FILE* imageFile) {
+  
+  const unsigned int paddedWidthInBytes = properties.width * properties.bytesPerPixel + properties.paddingSize;
+  const unsigned int imageSize = paddedWidthInBytes * properties.height;
+  const unsigned int totalHeaderSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + numberOfColors * 4;
   const unsigned int fileSize = totalHeaderSize + imageSize;
+
 
   uint32_t largeHeaders[12] = {
       fileSize,             // filesize (bfSize)
       0,                    // reserved (bfReserved1 and bfReserved2)
       totalHeaderSize,      // start pixel of the array (bfOffBits)
       INFO_HEADER_SIZE,     // bitmap info header size (biSize)
-      width,                // image width (biWidth)
-      height,               // image height (biHeight)
+      properties.width,                // image width (biWidth)
+      properties.height,               // image height (biHeight)
+                            // Here would go the number of color planes (biPlanes)
+                            // Here would go the bits per pixel (biBitCount)
       0,                    // compression (biCompression)
       imageSize,            // image size (biSizeImage)
       0,                    // horizontal resolution (biXPelsPerMeter)
       0,                    // vertical resolution (biYPelsPerMeter)
-      0,                    // colors in color table (biClrUsed)
+      numberOfColors,                    // colors in color table (biClrUsed)
       0                     // important color count (biClrImportant)
   };
 
   uint16_t biPlanes = 1; // number of color planes (biPlanes)
-  uint16_t biBitCount = BYTES_PER_PIXEL * 8; // bits per pixel (biBitCount)
+  uint16_t biBitCount = properties.bytesPerPixel * 8; // bits per pixel (biBitCount)
 
-  // Write the header
   // Write one byte at a time to take into account big-endian and little-endian
   fprintf(imageFile, "BM");
 
@@ -76,4 +121,19 @@ void writeBitmapHeader(const int height, const int width,
     fprintf(imageFile, "%c", (unsigned char)(largeHeaders[i] >> 16));
     fprintf(imageFile, "%c", (unsigned char)(largeHeaders[i] >> 24));
   }
+}
+
+static void writeImageToFile(const unsigned char* image, const ImageProperties properties, FILE* imageFile) {
+  const unsigned int widthInBytes = properties.width * properties.bytesPerPixel;
+  const unsigned char padding[3] = {0, 0, 0};
+
+  for (unsigned int i = 0; i < properties.height; ++i) {
+    fwrite(image + (i * widthInBytes), properties.bytesPerPixel, properties.width, imageFile);
+    fwrite(padding, 1, properties.paddingSize, imageFile);
+  }
+}
+
+static inline unsigned int getPaddingSize(const unsigned int width, const unsigned int bytesPerPixel) {
+  const unsigned int widthInBytes = width * bytesPerPixel;
+  return (4U - widthInBytes % 4U) % 4U;
 }

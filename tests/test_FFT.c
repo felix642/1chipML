@@ -146,22 +146,53 @@ static void knownTestingFFTI() {
 
 int main() {
 
-  int height = 400;
-  int width = 400;
-  unsigned char image[height][width][BYTES_PER_PIXEL];
+  int height = 256;
+  int width = 256;
+  unsigned char image[height][width][RGB_BYTES];
+  unsigned char imageG[height][width][GREY_BYTES];
+  double imageReals[height][width];
+  double imageImgs[height][width];
   char* imageFileName = (char*) "bitmapImage.bmp";
 
-  int i, j;
-  for (i = 0; i < height; i++) {
-      for (j = 0; j < width; j++) {
+
+  for (int i = 0; i < height; i++) {
+      for (int j = 0; j < width; j++) {
           image[i][j][2] = (unsigned char) ( i * 255 / height );             ///red
           image[i][j][1] = (unsigned char) ( j * 255 / width );              ///green
           image[i][j][0] = (unsigned char) ( (i+j) * 255 / (height+width) ); ///blue
+
+          imageG[i][j][0] = (unsigned char) ( 155 ); 
+          //double y = ( image[i][j][0]*0.3) + ( image[i][j][1]*0.59)	+ (image[i][j][2]*0.11);
+          //imageReals[i][j] = y;
+          //imageImgs[i][j] = 0;
       }
   }
 
-  generateBitmapImage((unsigned char*) image, height, width, imageFileName);
-  printf("Image generated!!");
+  generateBitmapImageRGB((unsigned char*) image, height, width, imageFileName);
+  generateBitmapImageGrey((unsigned char*) imageG, height, width, "grey.bmp");
+
+  //int result = FFT(height * width, (double*) imageReals, (double*) imageImgs, 1);
+  //printf("FFT result %d\n", result);
+
+  unsigned char imageGreyScaleR[height][width][RGB_BYTES];
+  unsigned char imageGreyScaleI[height][width][RGB_BYTES];
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      imageGreyScaleR[i][j][2] = (unsigned char) imageReals[i][j];
+      imageGreyScaleR[i][j][1] = (unsigned char) imageReals[i][j];
+      imageGreyScaleR[i][j][0] = (unsigned char) imageReals[i][j];
+
+      imageGreyScaleI[i][j][2] = (unsigned char) imageImgs[i][j];
+      imageGreyScaleI[i][j][1] = (unsigned char) imageImgs[i][j];
+      imageGreyScaleI[i][j][0] = (unsigned char) imageImgs[i][j];
+    }
+  }
+
+
+  //generateBitmapImage((unsigned char*) imageGreyScaleR, height, width, "real.bmp", RGB_BYTES);
+  //generateBitmapImage((unsigned char*) imageGreyScaleI, height, width, "imaginary.bmp", RGB_BYTES);
+
+  printf("Image generated!!\n");
 
   return 0;
 
