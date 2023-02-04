@@ -22,7 +22,13 @@ static void writeImageToFile(const unsigned char* image,
                              const ImageProperties properties, FILE* imageFile);
 
 
-
+/**
+ * @brief Creates a RGB bitmap image from data
+ * @param image The image data. One byte per channel (R, G, B) is expected
+ * @param height The image height, in pixels
+ * @param width The image width, in pixels
+ * @param imageFileName The image file name, with the bitmap extension
+*/
 void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
                             const unsigned int width, char* imageFileName) {
 
@@ -35,6 +41,13 @@ void generateBitmapImageRGB(unsigned char* image, const unsigned int height,
   fclose(imageFile);
 }
 
+/**
+ * @brief Creates a Grayscale bitmap image from data, with a single 8-bit channel
+ * @param image The image data. One byte per pixel is expected
+ * @param height The image height, in pixels
+ * @param width The image width, in pixels
+ * @param imageFileName The image file name, with the bitmap extension
+*/
 void generateBitmapImageGrey(unsigned char* image, const unsigned int height,
                              const unsigned int width, char* imageFileName) {
   const unsigned int paddingSize = getPaddingSize(width, GREY_BYTES);
@@ -144,7 +157,7 @@ static void writeImageToFile(const unsigned char* image,
 
 static inline unsigned int getPaddingSize(const unsigned int width,
                                           const unsigned int bytesPerPixel) {
-                                            
+
   const unsigned int widthInBytes = width * bytesPerPixel;
   return (4U - widthInBytes % 4U) % 4U;
 }
