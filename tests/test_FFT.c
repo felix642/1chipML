@@ -146,13 +146,13 @@ static void knownTestingFFTI() {
 
 int main() {
 
-  int height = 256;
-  int width = 256;
+  int height = 512;
+  int width = 512;
   unsigned char image[height][width][RGB_BYTES];
   unsigned char imageG[height][width][GREY_BYTES];
   double imageReals[height][width];
   double imageImgs[height][width];
-  char* imageFileName = (char*) "bitmapImage.bmp";
+  // char* imageFileName = (char*) "bitmapImageRGB.bmp";
 
 
   for (int i = 0; i < height; i++) {
@@ -161,38 +161,120 @@ int main() {
           image[i][j][1] = (unsigned char) ( j * 255 / width );              ///green
           image[i][j][0] = (unsigned char) ( (i+j) * 255 / (height+width) ); ///blue
 
-          imageG[i][j][0] = (unsigned char) ( 155 ); 
-          //double y = ( image[i][j][0]*0.3) + ( image[i][j][1]*0.59)	+ (image[i][j][2]*0.11);
-          //imageReals[i][j] = y;
-          //imageImgs[i][j] = 0;
+          double y = ( image[i][j][0] * 0.299) + ( image[i][j][1] * 0.587)	+ (image[i][j][2] * 0.114);
+          if (i > 128 && i < 384 && j > 128 && j < 384) {
+            imageG[i][j][0] = (unsigned char) ( 255 ); 
+          }
+          else {
+            imageG[i][j][0] = (unsigned char) ( 0 ); 
+          }
+
+          //imageG[i][j][0] = (unsigned char) ( y ); 
+          imageReals[i][j] = imageG[i][j][0];
+          imageImgs[i][j] = 0;
       }
   }
 
-  generateBitmapImageRGB((unsigned char*) image, height, width, imageFileName);
-  generateBitmapImageGrey((unsigned char*) imageG, height, width, "grey.bmp");
+  generateBitmapImageRGB((unsigned char*) image, height, width, "bitmapImageRGB.bmp");
+  generateBitmapImageGrey((unsigned char*) imageG, height, width, "bitmapImageGrey.bmp");
 
-  //int result = FFT(height * width, (double*) imageReals, (double*) imageImgs, 1);
-  //printf("FFT result %d\n", result);
-
-  unsigned char imageGreyScaleR[height][width][RGB_BYTES];
-  unsigned char imageGreyScaleI[height][width][RGB_BYTES];
+  /*******2D FFT*********/
+  int success = 1;
+  
+  // start with the rows
   for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
-      imageGreyScaleR[i][j][2] = (unsigned char) imageReals[i][j];
-      imageGreyScaleR[i][j][1] = (unsigned char) imageReals[i][j];
-      imageGreyScaleR[i][j][0] = (unsigned char) imageReals[i][j];
+    success = success && FFT(width, imageReals[i], imageImgs[i], 1);
+  }
 
-      imageGreyScaleI[i][j][2] = (unsigned char) imageImgs[i][j];
-      imageGreyScaleI[i][j][1] = (unsigned char) imageImgs[i][j];
-      imageGreyScaleI[i][j][0] = (unsigned char) imageImgs[i][j];
+  // end with columns
+  for (int i = 0; i < width; i++) {
+    double nextReals[height];
+    double nextImgs[height];
+    for (int j = 0; j < height; j++) {
+      nextReals[j] = imageReals[j][i];
+      nextImgs[j] = imageImgs[j][i];
+    }
+
+    success = success && FFT(height, nextReals, nextImgs, 1);
+
+    for (int j = 0; j < height; j++) {
+      imageReals[j][i] = nextReals[j];
+      imageImgs[j][i] = nextImgs[j];
+    }
+  }
+  /*******END OF 2D FFT*********/
+  
+  // shift fft matrix
+  // Move horizontally
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width / 2; ++j) {
+      double tmpReal = imageReals[i][j];
+      double tmpImg = imageImgs[i][j];
+      imageReals[i][j] = imageReals[i][j + width / 2];
+      imageImgs[i][j] = imageImgs[i][j + width / 2];
+      imageReals[i][j + width / 2] = tmpReal;
+      imageImgs[i][j + width / 2] = tmpImg;
+    }
+  }
+
+  // Move vertically
+  for (int i = 0; i < height / 2; ++i) {
+    for (int j = 0; j < width; ++j) {
+      double tmpReal = imageReals[i][j];
+      double tmpImg = imageImgs[i][j];
+      imageReals[i][j] = imageReals[i + height / 2][j];
+      imageImgs[i][j] = imageImgs[i + height / 2][j];
+      imageReals[i + height / 2][j] = tmpReal;
+      imageImgs[i + height / 2][j] = tmpImg;
     }
   }
 
 
-  //generateBitmapImage((unsigned char*) imageGreyScaleR, height, width, "real.bmp", RGB_BYTES);
-  //generateBitmapImage((unsigned char*) imageGreyScaleI, height, width, "imaginary.bmp", RGB_BYTES);
+
+  // get magnitude
+  double* imageAbs = malloc(height * width *sizeof(double));
+  for (int i = 0; i < height; i++) {
+      for (int j = 0; j < width; j++) {
+          double abs = sqrt(pow(imageReals[i][j], 2) + pow(imageImgs[i][j], 2));
+          imageAbs[i * width + j] = abs;
+      }
+  }
+
+  // get maximum magnitude
+  double max = imageAbs[0];
+  for (int i = 1; i < height * width; ++i) {
+    if (imageAbs[i] > max) {
+      max = imageAbs[i];
+    }
+  }
+
+  // log scalling magnitude and color coding
+  double greyColor = 255 / log10(1 + max);
+  for (int i = 1; i < height * width; ++i) {
+    imageAbs[i] = greyColor * log10(1 + imageAbs[i]);
+  }
+
+  printf("FFT result %d\n", success);
+
+  unsigned char imageGreyScaleR[height][width][GREY_BYTES];
+  unsigned char imageGreyScaleI[height][width][GREY_BYTES];
+  unsigned char imageGreyScaleMag[height][width][GREY_BYTES];
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      imageGreyScaleR[i][j][0] = (unsigned char) abs(imageReals[i][j]);
+      imageGreyScaleI[i][j][0] = (unsigned char) abs(imageImgs[i][j]);
+      imageGreyScaleMag[i][j][0] = (unsigned char) (imageAbs[i * width + j]);
+    }
+  }
+
+
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleR, height, width, "real.bmp");
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleI, height, width, "imaginary.bmp");
+  generateBitmapImageGrey((unsigned char*) imageGreyScaleMag, height, width, "magnitude.bmp");
 
   printf("Image generated!!\n");
+
+  free(imageAbs);
 
   return 0;
 
