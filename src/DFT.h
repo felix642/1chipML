@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray);
+void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, const int dir);
 
 #ifdef __cplusplus
 }

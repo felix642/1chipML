@@ -39,7 +39,7 @@ static void randomTestingFFT() {
   }
 
   FFT(length, fftReals, fftImgs, 1);
-  DFT(length, dftReals, dftImgs);
+  DFT(length, dftReals, dftImgs, 1);
   
   int isSimilar = compareFT(length, fftReals, fftImgs, dftReals, dftImgs);
   
@@ -69,7 +69,7 @@ static void randomTestingFFTI() {
     fftImgs[i] = imgs[i];
   }
 
-  DFT(length, fftReals, fftImgs);
+  DFT(length, fftReals, fftImgs, 1);
   FFT(length, fftReals, fftImgs, -1);
   
   int isSimilar = compareFT(length, reals, imgs, fftReals, fftImgs);

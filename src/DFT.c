@@ -10,21 +10,35 @@
  * @param imaginaryArray 1D array containing the imaginary part of the incoming
  * vector. This array will contain the end result of the imaginary part of the
  * DFT
+ * @param dir Direction of the DFT. 1 for the DFT, -1 for the inverse DFT
  */
-void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray) {
+void DFT(const unsigned length, dft_real* realArray, dft_real* imaginaryArray, const int dir) {
 
   dft_real outputReals[length];
   dft_real outputImaginaries[length];
   memset(outputReals, 0, length * sizeof(dft_real));
   memset(outputImaginaries, 0, length * sizeof(dft_real));
 
+  int thetaFactor = -1;
+  if (dir < 0) {
+    thetaFactor = 1;
+  }
+
   for (unsigned i = 0; i < length; ++i) {
-    dft_real exponentBase = -2.0 * M_PI * (dft_real)i / (dft_real)length;
+    dft_real exponentBase = thetaFactor * 2.0 * M_PI * (dft_real)i / (dft_real)length;
     for (unsigned k = 0; k < length; ++k) {
       dft_real wCos = cos(k * exponentBase); // real part
       dft_real wSin = sin(k * exponentBase); // imaginary part
       outputReals[i] += (realArray[k] * wCos - imaginaryArray[k] * wSin); // real
       outputImaginaries[i] += (realArray[k] * wSin + imaginaryArray[k] * wCos); // imaginary
+    }
+  }
+
+  // inverse DFT
+  if (dir < 0) {
+    for (unsigned i = 0; i < length; ++i) {
+      outputReals[i] /= length;
+      outputImaginaries[i] /= length;
     }
   }
 
