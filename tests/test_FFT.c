@@ -144,17 +144,88 @@ static void knownTestingFFTI() {
 
 }
 
+static void fftShift(unsigned int height, unsigned int width, double** reals, double** imgs) {
+  // shift fft matrix
+  // Move horizontally
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width / 2; ++j) {
+      double tmpReal = reals[i][j];
+      double tmpImg = imgs[i][j];
+      reals[i][j] = reals[i][j + width / 2];
+      imgs[i][j] = imgs[i][j + width / 2];
+      reals[i][j + width / 2] = tmpReal;
+      imgs[i][j + width / 2] = tmpImg;
+    }
+  }
+
+  // Move vertically
+  for (int i = 0; i < height / 2; ++i) {
+    for (int j = 0; j < width; ++j) {
+      double tmpReal = reals[i][j];
+      double tmpImg = imgs[i][j];
+      reals[i][j] = reals[i + height / 2][j];
+      imgs[i][j] = imgs[i + height / 2][j];
+      reals[i + height / 2][j] = tmpReal;
+      imgs[i + height / 2][j] = tmpImg;
+    }
+  }
+}
+
+static int fft2D(unsigned int height, unsigned int width, double** reals, double** imgs, int dir) {
+  int success = 1;
+  
+  // start with the rows
+  for (int i = 0; i < height; i++) {
+    success = success && FFT(width, reals[i], imgs[i], dir);
+  }
+
+  // end with columns
+  for (int i = 0; i < width; i++) {
+    double nextReals[height];
+    double nextImgs[height];
+    for (int j = 0; j < height; j++) {
+      nextReals[j] = reals[j][i];
+      nextImgs[j] = imgs[j][i];
+    }
+
+    success = success && FFT(height, nextReals, nextImgs, dir);
+
+    for (int j = 0; j < height; j++) {
+      reals[j][i] = nextReals[j];
+      imgs[j][i] = nextImgs[j];
+    }
+  }
+  return success;
+}
+
 int main() {
+
+  BITMAPINFOHEADER bitmapInfoHeader;
+  unsigned char* imageData;
+  imageData = readBitmapImage("cameraman-image.bmp", &bitmapInfoHeader);
+
+  
 
   int height = 512;
   int width = 512;
   unsigned char image[height][width][RGB_BYTES];
   unsigned char imageG[height][width][GREY_BYTES];
-  double imageReals[height][width];
-  double imageImgs[height][width];
+
+  double** imageReals = malloc(height * sizeof(double*));
+  double** imageImgs = malloc(height * sizeof(double*));
+  double** kernelReals = malloc(height * sizeof(double*));
+  double** kernelImgs = malloc(height * sizeof(double*));
+  for (int i = 0; i < height; ++i) {
+    imageReals[i] = malloc(width * sizeof(double));
+    imageImgs[i] = malloc(width * sizeof(double));
+    kernelReals[i] = malloc(width * sizeof(double));
+    kernelImgs[i] = malloc(width * sizeof(double));
+  }
+
+  //double imageImgs[height][width];
   // char* imageFileName = (char*) "bitmapImageRGB.bmp";
 
-
+  /*
   for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
           image[i][j][2] = (unsigned char) ( i * 255 / height );             ///red
@@ -169,67 +240,80 @@ int main() {
             imageG[i][j][0] = (unsigned char) ( 0 ); 
           }
 
-          //imageG[i][j][0] = (unsigned char) ( y ); 
+          imageG[i][j][0] = (unsigned char) ( y ); 
           imageReals[i][j] = imageG[i][j][0];
           imageImgs[i][j] = 0;
       }
+  }
+  */
+
+  for (int i = 0; i < bitmapInfoHeader.biHeight; ++i) {
+    for (int j = 0; j < bitmapInfoHeader.biWidth; ++j) {
+      double y = ( imageData[i* bitmapInfoHeader.biWidth * 3 + j * 3] * 0.299) 
+      + ( imageData[i* bitmapInfoHeader.biWidth * 3 + j * 3 + 1] * 0.587)	
+      + ( imageData[i* bitmapInfoHeader.biWidth * 3 + j * 3 + 2] * 0.114);
+
+      imageG[i][j][0] = (unsigned char) ( y ); 
+      imageReals[i][j] = imageG[i][j][0];
+      imageImgs[i][j] = 0;
+    }
   }
 
   generateBitmapImageRGB((unsigned char*) image, height, width, "bitmapImageRGB.bmp");
   generateBitmapImageGrey((unsigned char*) imageG, height, width, "bitmapImageGrey.bmp");
 
-  /*******2D FFT*********/
-  int success = 1;
+  // Compute 2D fft
+  int success = fft2D(height, width, imageReals, imageImgs, 1);
+  //success = fft2D(height, width, imageReals, imageImgs, -1);
+  printf("FFT result %d\n", success);
   
-  // start with the rows
-  for (int i = 0; i < height; i++) {
-    success = success && FFT(width, imageReals[i], imageImgs[i], 1);
-  }
 
-  // end with columns
-  for (int i = 0; i < width; i++) {
-    double nextReals[height];
-    double nextImgs[height];
-    for (int j = 0; j < height; j++) {
-      nextReals[j] = imageReals[j][i];
-      nextImgs[j] = imageImgs[j][i];
-    }
 
-    success = success && FFT(height, nextReals, nextImgs, 1);
+  // convolution matrix generation
+  unsigned int kernelHeight = 11;
+  unsigned int kernelWidth = 11;
 
-    for (int j = 0; j < height; j++) {
-      imageReals[j][i] = nextReals[j];
-      imageImgs[j][i] = nextImgs[j];
-    }
-  }
-  /*******END OF 2D FFT*********/
-  
-  // shift fft matrix
-  // Move horizontally
-  for (int i = 0; i < height; ++i) {
-    for (int j = 0; j < width / 2; ++j) {
-      double tmpReal = imageReals[i][j];
-      double tmpImg = imageImgs[i][j];
-      imageReals[i][j] = imageReals[i][j + width / 2];
-      imageImgs[i][j] = imageImgs[i][j + width / 2];
-      imageReals[i][j + width / 2] = tmpReal;
-      imageImgs[i][j + width / 2] = tmpImg;
+
+  unsigned int totalPaddingVertical = height - kernelHeight;
+  unsigned int totalPaddingHorizontal = width - kernelWidth;
+  unsigned int paddingTop = (totalPaddingVertical + 1) / 2;
+  unsigned int paddingBottom = totalPaddingVertical / 2;
+  unsigned int paddingLeft = (totalPaddingHorizontal + 1) / 2;
+  unsigned int paddingRight = totalPaddingHorizontal / 2;
+
+  for(int i = 0; i < height; ++i) {
+    for(int j = 0; j < width; ++j) {
+      kernelImgs[i][j] = 0;
+      if (i >= paddingTop && i < paddingTop + kernelHeight && j >= paddingLeft && j < paddingLeft + kernelWidth) {
+        kernelReals[i][j] = 1.0 / (kernelHeight * kernelWidth);
+      }
+      else {
+        kernelReals[i][j] = 0;
+      }
     }
   }
 
-  // Move vertically
-  for (int i = 0; i < height / 2; ++i) {
-    for (int j = 0; j < width; ++j) {
-      double tmpReal = imageReals[i][j];
-      double tmpImg = imageImgs[i][j];
-      imageReals[i][j] = imageReals[i + height / 2][j];
-      imageImgs[i][j] = imageImgs[i + height / 2][j];
-      imageReals[i + height / 2][j] = tmpReal;
-      imageImgs[i + height / 2][j] = tmpImg;
+  // shift the kernel
+  fftShift(height, width, kernelReals, kernelImgs);
+
+  // 2d fft of the kernel
+  fft2D(height, width, kernelReals, kernelImgs, 1);
+
+  // element-wise multiplication between the kernel and the image
+  for(int i = 0; i < height; ++i) {
+    for(int j = 0; j < width; ++j) {
+      double tmpImageReal = imageReals[i][j];
+      imageReals[i][j] = tmpImageReal * kernelReals[i][j] - imageImgs[i][j] * kernelImgs[i][j];
+      imageImgs[i][j] = tmpImageReal * kernelImgs[i][j] + imageImgs[i][j] * kernelReals[i][j];
     }
   }
 
+  // inverse fft on result
+  fft2D(height, width, imageReals, imageImgs, -1);
+  // Then the result is obtained!
 
+  // Shift 2D fft center
+  //fftShift(height, width, imageReals, imageImgs);
 
   // get magnitude
   double* imageAbs = malloc(height * width *sizeof(double));
@@ -254,7 +338,6 @@ int main() {
     imageAbs[i] = greyColor * log10(1 + imageAbs[i]);
   }
 
-  printf("FFT result %d\n", success);
 
   unsigned char imageGreyScaleR[height][width][GREY_BYTES];
   unsigned char imageGreyScaleI[height][width][GREY_BYTES];
@@ -274,7 +357,22 @@ int main() {
 
   printf("Image generated!!\n");
 
+  // free all
   free(imageAbs);
+
+  for (int i = 0; i < height; ++i) {
+    free(imageReals[i]);
+    free(imageImgs[i]);
+    free(kernelReals[i]);
+    free(kernelImgs[i]);
+  }
+  free(imageReals);
+  free(imageImgs);
+  free(kernelReals);
+  free(kernelImgs);
+
+  free(imageData);
+
 
   return 0;
 

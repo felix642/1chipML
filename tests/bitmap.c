@@ -1,6 +1,6 @@
 #include "bitmap.h"
-#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct ImageProperties {
   unsigned int height;
@@ -22,9 +22,78 @@ static void writeImageToFile(const unsigned char* image,
                              const ImageProperties properties, FILE* imageFile);
 
 
+unsigned char* readBitmapImage(char *filename, BITMAPINFOHEADER *bitmapInfoHeader) {
+  //
+  FILE *imageFile;
+  BITMAPFILEHEADER bitmapFileHeader;
+
+  //open file in read binary mode
+  imageFile = fopen(filename,"rb");
+  if (imageFile == NULL) {
+    return NULL;
+  }
+
+  // read individual bitmap file header properties
+  // Must be read individually to prevent packing issues
+  fread(&bitmapFileHeader.bfType, sizeof(bitmapFileHeader.bfType), 1, imageFile);
+  fread(&bitmapFileHeader.bfSize, sizeof(bitmapFileHeader.bfSize), 1, imageFile);
+  fread(&bitmapFileHeader.bfReserved1, sizeof(bitmapFileHeader.bfReserved1), 1, imageFile);
+  fread(&bitmapFileHeader.bfReserved2, sizeof(bitmapFileHeader.bfReserved2), 1, imageFile);
+  fread(&bitmapFileHeader.bfOffBits, sizeof(bitmapFileHeader.bfOffBits), 1, imageFile);
+
+  // Verify for the bm file type
+  if (bitmapFileHeader.bfType != 0x4D42)
+  {
+      fclose(imageFile);
+      return NULL;
+  }
+
+  // Read individual bitmap file header properties
+  // Must be read individually to prevent packing issues
+  fread(&bitmapInfoHeader->biSize, sizeof(bitmapInfoHeader->biSize), 1, imageFile);
+  fread(&bitmapInfoHeader->biWidth, sizeof(bitmapInfoHeader->biWidth), 1, imageFile);
+  fread(&bitmapInfoHeader->biHeight, sizeof(bitmapInfoHeader->biHeight), 1, imageFile);
+  fread(&bitmapInfoHeader->biPlanes, sizeof(bitmapInfoHeader->biPlanes), 1, imageFile);
+  fread(&bitmapInfoHeader->biBitCount, sizeof(bitmapInfoHeader->biBitCount), 1, imageFile);
+  fread(&bitmapInfoHeader->biCompression, sizeof(bitmapInfoHeader->biCompression), 1, imageFile);
+  fread(&bitmapInfoHeader->biSizeImage, sizeof(bitmapInfoHeader->biSizeImage), 1, imageFile);
+  fread(&bitmapInfoHeader->biXPelsPerMeter, sizeof(bitmapInfoHeader->biXPelsPerMeter), 1, imageFile);
+  fread(&bitmapInfoHeader->biYPelsPerMeter, sizeof(bitmapInfoHeader->biYPelsPerMeter), 1, imageFile);
+  fread(&bitmapInfoHeader->biClrUsed, sizeof(bitmapInfoHeader->biClrUsed), 1, imageFile);
+  fread(&bitmapInfoHeader->biClrImportant, sizeof(bitmapInfoHeader->biClrImportant), 1, imageFile);
+
+  // Go where the data is
+  fseek(imageFile, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+  // handle cases where the size is 0
+  if (bitmapInfoHeader->biSizeImage == 0) {
+    bitmapInfoHeader->biSizeImage = bitmapFileHeader.bfSize - bitmapFileHeader.bfOffBits;
+  }
+
+  // Allocate memory for the bitmap data
+  unsigned char* imageData = (unsigned char*)malloc(bitmapInfoHeader->biSizeImage);
+  if (imageData == NULL) {
+    fclose(imageFile);
+    return NULL;
+  }
+
+  //read in the bitmap image data
+  fread(imageData, bitmapInfoHeader->biSizeImage, 1, imageFile);
+  if (imageData == NULL)
+  {
+      fclose(imageFile);
+      return NULL;
+  }
+
+  // close file and return bitmap image data in the BGR format
+  fclose(imageFile);
+  return imageData;
+
+}
+
 /**
  * @brief Creates a RGB bitmap image from data
- * @param image The image data. One byte per channel (R, G, B) is expected
+ * @param image The image data. One byte per channel in the order: B, G, R is expected
  * @param height The image height, in pixels
  * @param width The image width, in pixels
  * @param imageFileName The image file name, with the bitmap extension
@@ -92,16 +161,16 @@ static void writeGenericHeader(const unsigned int numberOfColors,
   const unsigned int fileSize = totalHeaderSize + imageSize;
 
   uint32_t largeHeaders[12] = {
-      fileSize,          // filesize (bfSize)
+      fileSize,          // the size in bytes of the bitmap file (bfSize)
       0,                 // reserved (bfReserved1 and bfReserved2)
       totalHeaderSize,   // start pixel of the array (bfOffBits)
       INFO_HEADER_SIZE,  // bitmap info header size (biSize)
-      properties.width,  // image width (biWidth)
-      properties.height, // image height (biHeight)
+      properties.width,  // image width in pixels (biWidth)
+      properties.height, // image height in pixels (biHeight)
                          // Here would go the number of color planes (biPlanes)
                          // Here would go the bits per pixel (biBitCount)
       0,                 // compression (biCompression)
-      imageSize,         // image size (biSizeImage)
+      imageSize,         // image size in bytes (biSizeImage)
       0,                 // horizontal resolution (biXPelsPerMeter)
       0,                 // vertical resolution (biYPelsPerMeter)
       numberOfColors,    // colors in color table (biClrUsed)
