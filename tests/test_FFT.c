@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <time.h>
 
-// Golden model
 static int compareFT(const unsigned length, fft_real* incomingReals, 
   fft_real* incomingImgs, fft_real* expectedReals, fft_real* expectedImgs) {
 
@@ -130,7 +129,7 @@ static void knownTestingFFTI() {
 
 int main() {
 
-  int seed = 1675474412;//time(NULL);
+  int seed = time(NULL);
   printf("seed used : %d\n", seed);
   srand(seed);
 
