@@ -38,12 +38,12 @@ static inline int isPowerOfTwo(const unsigned value) {
  * vector. This array will contain the end result of the imaginary part of the
  * FFT
  * @param dir Direction of the FFT. 1 for the FFT, -1 for the inverse FFT
- * @return 0 if an error occured, 1 otherwise
+ * @return -1 if an error occured, 0 otherwise
  *
  */
 int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, const int dir) {
   if (!isPowerOfTwo(length) || realArray == NULL || imaginaryArray == NULL) {
-    return 0;
+    return -1;
   }
 
   int thetaFactor = -1;
@@ -95,5 +95,5 @@ int FFT(const unsigned length, fft_real* realArray, fft_real* imaginaryArray, co
     }
   }
 
-  return 1;
+  return 0;
 }
