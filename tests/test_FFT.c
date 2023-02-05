@@ -172,11 +172,13 @@ static void fftShift(unsigned int height, unsigned int width, double** reals, do
 }
 
 static int fft2D(unsigned int height, unsigned int width, double** reals, double** imgs, int dir) {
-  int success = 1;
   
   // start with the rows
   for (int i = 0; i < height; i++) {
-    success = success && FFT(width, reals[i], imgs[i], dir);
+    int success = FFT(width, reals[i], imgs[i], dir);
+    if (success == -1) {
+      return success;
+    }
   }
 
   // end with columns
@@ -188,14 +190,20 @@ static int fft2D(unsigned int height, unsigned int width, double** reals, double
       nextImgs[j] = imgs[j][i];
     }
 
-    success = success && FFT(height, nextReals, nextImgs, dir);
+
+
+    int success = FFT(height, nextReals, nextImgs, dir);
+    if (success == -1) {
+      return success;
+    }
 
     for (int j = 0; j < height; j++) {
       reals[j][i] = nextReals[j];
       imgs[j][i] = nextImgs[j];
     }
   }
-  return success;
+
+  return 0;
 }
 
 int main() {
