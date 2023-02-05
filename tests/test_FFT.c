@@ -22,7 +22,7 @@ static int compareFT(const unsigned length, fft_real* incomingReals,
 static void randomTestingFFT() {
 
   // limit length to 8 for faster testing
-  unsigned length = (unsigned)pow(2, rand() % 9);
+  const unsigned length = (unsigned)pow(2, rand() % 9);
 
   // allocate arrays for testing
   fft_real fftReals[length];
@@ -66,7 +66,7 @@ static void randomTestingFFT() {
 static void randomTestingFFTI() {
 
   // limit length to 8 for faster testing
-  unsigned length = (unsigned)pow(2, rand() % 9);
+  const unsigned length = (unsigned)pow(2, rand() % 9);
 
   // allocate arrays for testing
   fft_real reals[length];
@@ -95,7 +95,7 @@ static void randomTestingFFTI() {
 }
 
 static void knownTestingFFT() {
-  unsigned length = 4;
+  const unsigned length = 4;
 
   // allocate arrays for testing
   fft_real fftReals[] = {8, 4, 8, 0};
@@ -120,7 +120,7 @@ static void knownTestingFFT() {
 }
 
 static void knownTestingFFTI() {
-  unsigned length = 4;
+  const unsigned length = 4;
 
   // allocate arrays for testing
   fft_real dftReals[] = {8, 4, 8, 0};
