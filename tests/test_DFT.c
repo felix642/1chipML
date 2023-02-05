@@ -12,11 +12,11 @@ static int compareFT(const unsigned length, fft_real* incomingReals,
   for (unsigned i = 0; i < length; ++i) {
     if (abs(incomingReals[i] - expectedReals[i]) > epsilon ||
         abs(incomingImgs[i] - expectedImgs[i]) > epsilon) {
-      return 0;
+      return -1;
     }
   }
 
-  return 1;
+  return 0;
 }
 
 static void knownTestingDFT() {
@@ -33,7 +33,7 @@ static void knownTestingDFT() {
   int isSimilar = compareFT(length, dftReals, dftImgs, expectedReals, expectedImgs);
 
   printf("Known testing FFT: is the FFT working as intended? ");
-  if (isSimilar)
+  if (isSimilar == 0)
     printf("true\n");
   else
     printf("false\n");
@@ -54,7 +54,7 @@ static void knownTestingDFTI() {
   int isSimilar = compareFT(length, dftReals, dftImgs, expectedReals, expectedImgs);
 
   printf("Known testing inverse FFT: is the FFT working as intended? ");
-  if (isSimilar)
+  if (isSimilar == 0)
     printf("true\n");
   else
     printf("false\n");
