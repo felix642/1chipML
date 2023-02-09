@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory gradient_descent monte_carlo jacobi
+all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory gradient_descent monte_carlo jacobi lanczos
 
 test: all run_all_tests
 
@@ -41,9 +41,7 @@ jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-
 run_all_tests:
-<<<<<<< HEAD
 	./$(BUILD_FOLDER)/test_gradient_descent.out
 	./$(BUILD_FOLDER)/test_jacobi.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
@@ -54,6 +52,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_genetic_low_memory.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
 	./$(BUILD_FOLDER)/test_jacobi.out
+	./$(BUILD_FOLDER)/test_lanczos.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
