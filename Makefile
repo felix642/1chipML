@@ -10,7 +10,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation jacobi
+all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation jacobi lanczos
 
 test: all run_all_tests
 
@@ -23,11 +23,16 @@ gauss_elimination: ./$(TEST_FOLDER)/test_gauss_elimination.c ./src/gauss_elimina
 poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interpolation.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
+<<<<<<< HEAD
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 lanczos: ./tests/test_lanczos.c ./src/lanczos.c -I./src | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
+=======
+lanczos: ./tests/test_lanczos.c ./src/lanczos.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+>>>>>>> 6ece2d3 (Standardized lanczos test)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
