@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation
+all: linear_congruential_random_generator gauss_elimination poly_interpolation lanczos
 
 test: all run_all_tests
 
@@ -21,11 +21,8 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-lanczos:
-	$(CC) ./tests/test_lanczos.c ./src/lanczos.c -I./src -lm -Wall -std=c99 -Os -o test_lanczos.out
-
-lanczos:
-	$(CC) ./tests/test_lanczos.c ./src/lanczos.c -I./src -lm -Wall -std=c99 -Os -o test_lanczos.out
+lanczos: ./tests/test_lanczos.c ./src/lanczos.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./test_linear_congruential_random_generator.out
