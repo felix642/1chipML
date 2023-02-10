@@ -5,7 +5,10 @@ double brent(double ax, double bx, double cx, double (*func)(double x, struct f1
 void mnbrak(double* ax, double* bx, double* cx, double* fa, double* fb, double* fc, double (*func)(double x, struct f1DimParam), struct f1DimParam param);
 double f1dim(double x, struct f1DimParam param);
 
-double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double[]), double point[], int n) {
+// TODO - Calculate finite difference with 2 orders and let user specify it
+// TODO - Give option of 1st order or second order (if not in loop)
+
+double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double[]), double point[], int n) { // TODO - point = initialGuess
     // Init vectors
     double *g = malloc(n * sizeof(double));
     double *h = malloc(n * sizeof(double));
@@ -17,23 +20,23 @@ double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double
     (*dfunc)(point, xi);
     for (int i = 0; i < n; i++) {
         g[i] = -xi[i];
-        xi[i] = h[i] = g[i];
+        xi[i] = h[i] = g[i]; // TODO - consider memcpy
     }
 
-    for (int its = 0; its <= ITMAX; its++) {
+    for (int its = 0; its <= ITMAX; its++) { // TODO - ITMAX parameter
         // Move point to the minimum along the h direction
-        ret = linmin(point, xi, n, func);
+        ret = linmin(point, xi, n, func); // TODO - maybe in the future improve with dlinmin if necessarygit
 
         // Checks if we are not moving enough (i.e we reached a min)
         // Normal function exit
-        if (2.0*fabs(ret-fp) <= TOL*(fabs(ret)+fabs(fp)+EPS)) {
+        if (2.0*fabs(ret-fp) <= TOL*(fabs(ret)+fabs(fp)+EPS)) { // TODO - Tolerance defined by user EPS
             return ret;
         }
 
         fp = ret;
         (*dfunc)(point,xi);
-        dgg=gg=0.0;
-        for (int j=0;j<n;j++) {
+        dgg=gg=0.0; // TODO - Refer to paper for mathematical names
+        for (int j=0;j<n;j++) {// TODO - Make vector multiply in util.h if useful
             gg += g[j]*g[j];
             dgg += (xi[j]+g[j])*xi[j];
         }
@@ -43,7 +46,7 @@ double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double
             return ret;
         }
 
-        gam=dgg/gg;
+        gam=dgg/gg; // TODO - divide  by gg + Small epsilon and allows to remove if
         for (int j=0;j<n;j++) {
             g[j] = -xi[j];
             xi[j]=h[j]=g[j]+gam*h[j];

@@ -8,7 +8,7 @@
 #define EPS 1.0e-10
 #define GLIMIT 100.0
 #define CGOLD 0.3819660
-#define GOLD 1.618034
+#define GOLD 1.618034 // Put reference to paper as to why this number is there
 
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 #define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
