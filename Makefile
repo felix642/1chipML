@@ -4,7 +4,7 @@ BUILD_FOLDER = $(TEST_FOLDER)/build
 
 CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
-CFLAGS += -std=c99 # C99
+CFLAGS += -std=c99# C99
 CFLAGS += -I./src # included header files
 
 # loaded libraries
@@ -38,7 +38,7 @@ monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linea
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c | build_folder
+lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 run_all_tests:
