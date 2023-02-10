@@ -2,7 +2,7 @@ CC=gcc
 
 CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
-CFLAGS += -std=c99 # C99
+CFLAGS += -std=c99# C99
 CFLAGS += -I./src # included header files
 
 # loaded libraries
@@ -21,7 +21,7 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
-lanczos: ./tests/test_lanczos.c ./src/lanczos.c
+lanczos: ./tests/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
