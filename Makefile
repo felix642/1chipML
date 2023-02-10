@@ -4,7 +4,7 @@ BUILD_FOLDER = $(TEST_FOLDER)/build
 
 CFLAGS += -g # adds debugging information
 CFLAGS += -Wall # turns on most compiler warnings
-CFLAGS += -std=c99 # C99
+CFLAGS += -std=c99# C99
 CFLAGS += -I./src # included header files
 
 # loaded libraries
@@ -23,16 +23,11 @@ gauss_elimination: ./$(TEST_FOLDER)/test_gauss_elimination.c ./src/gauss_elimina
 poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interpolation.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
-<<<<<<< HEAD
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 lanczos: ./tests/test_lanczos.c ./src/lanczos.c -I./src | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
-=======
-lanczos: ./tests/test_lanczos.c ./src/lanczos.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
->>>>>>> 6ece2d3 (Standardized lanczos test)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
