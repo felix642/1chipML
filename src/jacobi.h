@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_ITERATION 100
-#define DIGITS_PRECISION 15
+#ifndef DIGITS_PRECISION
+    #define DIGITS_PRECISION 15
+#endif
 
 typedef double real_number;
 typedef unsigned int vec_size;
