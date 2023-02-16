@@ -17,5 +17,6 @@
 /* Include 1chipML methods below */
 #include "./gauss_elimination.h"
 #include "./linear_congruential_random_generator.h"
+#include "./gradient_descent.h"
 
 /* -- End of file -- */
