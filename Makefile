@@ -39,6 +39,7 @@ jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
 run_all_tests:
+<<<<<<< HEAD
 	./$(BUILD_FOLDER)/test_gradient_descent.out
 	./$(BUILD_FOLDER)/test_jacobi.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
@@ -48,6 +49,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_genetic.out
 	./$(BUILD_FOLDER)/test_genetic_low_memory.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
+	./$(BUILD_FOLDER)/test_jacobi.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)

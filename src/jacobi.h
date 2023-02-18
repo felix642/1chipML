@@ -12,10 +12,6 @@
 typedef double real_number;
 typedef unsigned int vec_size;
 
-#ifndef DIGITS_PRECISION
-    #define DIGITS_PRECISION 15
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
