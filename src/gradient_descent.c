@@ -1,55 +1,64 @@
 #include <gradient_descent.h>
 
-double linmin(double point[], double h[], int n, double (*func)(double[]));
-double brent(double ax, double bx, double cx, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param);
-void mnbrak(double* ax, double* bx, double* cx, double* fa, double* fb, double* fc, double (*func)(double x, struct f1DimParam), struct f1DimParam param);
+double linmin(double point[], double gradient[], int n, function func);
+double brent(MinBracket bracket, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param);
+MinBracket mnbrak(MinBracket bracket, double (*func)(double x, struct f1DimParam), struct f1DimParam param);
 double f1dim(double x, struct f1DimParam param);
 
 // TODO - Calculate finite difference with 2 orders and let user specify it
 // TODO - Give option of 1st order or second order (if not in loop)
 
-double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double[]), double point[], int n) { // TODO - point = initialGuess
-    // Init vectors
-    double *g = malloc(n * sizeof(double));
-    double *h = malloc(n * sizeof(double));
-    double *xi = malloc(n * sizeof(double));
-    double ret, fp, dgg, gg, gam;
+double gradient_descent(function func, derivative dfunc, double guess[], int n) {
+    // Gradient of the function
+    double *gradient = malloc(n * sizeof(double));
+    double *nextGradient = malloc(n * sizeof(double));
 
-    // Initialise g and h to the inverse of the gradient
-    fp = (*func)(point);
-    (*dfunc)(point, xi);
+    // Conjugate gradient of the function
+    double *conjugate = malloc(n * sizeof(double));
+
+    // Compute initial value of function at the guess point
+    double value = (*func)(guess);
+
+    // Compute gradient of the function at the guess point
+    (*dfunc)(guess, gradient);
+
+    // Initialize the gradient and the conjugate
+    double temp;
     for (int i = 0; i < n; i++) {
-        g[i] = -xi[i];
-        xi[i] = h[i] = g[i]; // TODO - consider memcpy
+        temp = -gradient[i];
+        gradient[i] = temp;
+        conjugate[i] = temp;
     }
 
     for (int its = 0; its <= ITMAX; its++) { // TODO - ITMAX parameter
-        // Move point to the minimum along the h direction
-        ret = linmin(point, xi, n, func); // TODO - maybe in the future improve with dlinmin if necessarygit
+        // Moves the guess to the minimum along the conjugate gradient direction
+        // Obtain the value of the function at that minimum
+        double min = linmin(guess, conjugate, n, func);
 
-        // Checks if we are not moving enough (i.e we reached a min)
-        // Normal function exit
-        if (2.0*fabs(ret-fp) <= TOL*(fabs(ret)+fabs(fp)+EPS)) { // TODO - Tolerance defined by user EPS
-            return ret;
+        // Checks if we have reached a minimum
+        if (2.0*fabs(min - value) <= TOL*(fabs(min)+fabs(value)+EPS)) { // TODO - Tolerance defined by user EPS
+            return min;
         }
 
-        fp = ret;
-        (*dfunc)(point,xi);
-        dgg=gg=0.0; // TODO - Refer to paper for mathematical names
-        for (int j=0;j<n;j++) {// TODO - Make vector multiply in util.h if useful
-            gg += g[j]*g[j];
-            dgg += (xi[j]+g[j])*xi[j];
-        }
+        // Set the value of the function at the new guess point
+        value = min;
 
-        // Gradient is 0 we are done (maybe introduce a tolerance check here)
-        if (gg == 0.0) {
-            return ret;
-        }
+        // Compute the gradient at the new guess point
+        (*dfunc)(guess,nextGradient);
 
-        gam=dgg/gg; // TODO - divide  by gg + Small epsilon and allows to remove if
-        for (int j=0;j<n;j++) {
-            g[j] = -xi[j];
-            xi[j]=h[j]=g[j]+gam*h[j];
+        // Compute the adjustment factor gamma for the new conjugate
+        double dgg = 0.0;
+        double gg = 0.0;
+        for (int i = 0; i < n; i++) {
+            gg += gradient[i]*gradient[i];
+            dgg += (nextGradient[i]+gradient[i])*nextGradient[i];
+        }
+        double gamma = dgg / (gg + EPS); // Add small epsilon to prevent division by 0
+
+        // Set the new conjugate and gradient for the next iteration
+        for (int i = 0; i < n; i++) {
+            gradient[i] = -nextGradient[i];
+            conjugate[i] = gradient[i] + gamma * conjugate[i];
         }
     }
     
@@ -57,28 +66,25 @@ double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double
     return 0.0;
 }
 
-double linmin(double point[], double h[], int n, double (*func)(double[])) {
-    int j;
-    double xx,xmin,fx,fb,fa,bx,ax,ret;
+double linmin(double point[], double direction[], int n, function func) {
+    double xmin,ret;
 
     struct f1DimParam param;
     param.ncom = n;
     param.xicom = malloc(n * sizeof(double));
     param.pcom = malloc(n * sizeof(double));
     param.nrfunc = func;
-    for (j=0;j<=n;j++) {
-        param.pcom[j] = point[j];
-        param.xicom[j]= h[j];
+    for (int i = 0; i <= n; i++) {
+        param.pcom[i] = point[i];
+        param.xicom[i] = direction[i];
     }
 
-    ax=0.0;
-    xx=1.0;
-    mnbrak(&ax,&xx,&bx,&fa,&fx,&fb,f1dim, param);
-    ret = brent(ax,xx,bx,f1dim,TOL,&xmin, param);
+    MinBracket bracket = {0.0, 1.0, 0.0};
+    bracket = mnbrak(bracket, f1dim, param);
+    ret = brent(bracket, f1dim, TOL, &xmin, param);
 
-    for (j=0;j<n;j++) { 
-        h[j] *= xmin;
-        point[j] += h[j];
+    for (int i = 0; i < n; i++) {
+        point[i] += direction[i] * xmin;
     }
 
     free(param.xicom);
@@ -87,14 +93,14 @@ double linmin(double point[], double h[], int n, double (*func)(double[])) {
     return ret;
 }
 
-double brent(double ax, double bx, double cx, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param) {
+double brent(MinBracket bracket, double (*func)(double x, struct f1DimParam), double tol, double* xmin, struct f1DimParam param) {
     int iter;
     double a,b,d,etemp,fu,fv,fw,fx,p,q,r,tol1,tol2,u,v,w,x,xm;
     double e=0.0;
 
-    a=(ax < cx ? ax : cx);
-    b=(ax > cx ? ax : cx);
-    x=w=v=bx;
+    a=(bracket.a < bracket.c ? bracket.a : bracket.c);
+    b=(bracket.a > bracket.c ? bracket.a : bracket.c);
+    x=w=v=bracket.b;
     fw=fv=fx=(*func)(x, param);
 
     for (iter=1;iter<=ITMAX;iter++) {
@@ -155,69 +161,85 @@ double brent(double ax, double bx, double cx, double (*func)(double x, struct f1
     return fx;
 }
 
-void mnbrak(double* ax, double* bx, double* cx, double* fa, double* fb, double* fc, double (*func)(double x, struct f1DimParam), struct f1DimParam param) {
-    double ulim,u,r,q,fu,dum;
+// Brackets the minimum between 3 points (ax, bx, cx)
+// ax and bx are the initial points
+MinBracket mnbrak(MinBracket bracket, double (*func)(double x, struct f1DimParam), struct f1DimParam param) {
+    double ulim, u, r, q, fu, dum, fa, fb, fc;
 
-    *fa=(*func)(*ax, param);
-    *fb=(*func)(*bx, param);
+    // Evaluate function at initial points a and b
+    fa = (*func)(bracket.a, param);
+    fb = (*func)(bracket.b, param);
 
-    if (*fb > *fa) {
-        SHFT(dum,*ax,*bx,dum);
-        SHFT(dum,*fb,*fa,dum);
+    // We want to go downhill from a to b to bracket the minimum 
+    // so if fb > fa we need to switch them
+    if (fb > fa) {
+        SHFT(dum, bracket.a, bracket.b, dum);
+        SHFT(dum, fb, fa, dum);
     }
 
-    *cx=(*bx)+GOLD*(*bx-*ax);
-    *fc=(*func)(*cx, param);
+    // Initial guess for c
+    bracket.c = (bracket.b) + GOLD * (bracket.b - bracket.a);
+    fc = (*func)(bracket.c, param);
 
-    while (*fb > *fc) {
-        r=(*bx-*ax)*(*fb-*fc);
-        q=(*bx-*cx)*(*fb-*fa);
-        u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/(2.0*SIGN(FMAX(fabs(q-r),TINY),q-r));
+    // Loop until we bracket the minimum 
+    while (fb > fc) {
+        // Parabolic interpolation for u
+        r = (bracket.b - bracket.a) * (fb - fc);
+        q = (bracket.b - bracket.c) * (fb - fa);
+        // TODO - find simpler way to prevent division by 0
+        u = (bracket.b) - ((bracket.b - bracket.c) * q - (bracket.b - bracket.a) * r) / (2.0 * SIGN(FMAX(fabs(q - r), TINY), q - r)); //TODO replace TINY by epsilon
 
-        ulim=(*bx)+GLIMIT*(*cx-*bx);
-        if ((*bx-u)*(u-*cx) > 0.0) {
-            fu=(*func)(u, param);
-            if (fu < *fc) {
-                *ax=(*bx);
-                *bx=u;
-                *fa=(*fb);
-                *fb=fu;
-                return;
+        ulim = (bracket.b) + GLIMIT * (bracket.c - bracket.b);
+        if ((bracket.b - u) * (u - bracket.c) > 0.0) {
+            fu = (*func)(u, param);
+            if (fu < fc) {
+                bracket.a = (bracket.b);
+                bracket.b = u;
+                fa = (fb);
+                fb = fu;
+                return bracket;
             }
-            else if (fu > *fb) {
-                *cx=u;
-                *fc=fu;
-                return;
+            else if (fu > fb) {
+                bracket.c = u;
+                fc = fu;
+                return bracket;
             }
-            u=(*cx)+GOLD*(*cx-*bx);
-            fu=(*func)(u, param); 
+            u = (bracket.c) + GOLD * (bracket.c - bracket.b);
+            fu = (*func)(u, param); 
         }
-        else if ((*cx-u)*(u-ulim) > 0.0) {
+        else if ((bracket.c - u) * (u - ulim) > 0.0) {
             fu=(*func)(u, param);
-            if (fu < *fc) {
-                SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx));
-                SHFT(*fb,*fc,fu,(*func)(u, param));
+            if (fu < fc) {
+                SHFT(bracket.b, bracket.c, u, bracket.c + GOLD * (bracket.c - bracket.b));
+                SHFT(fb, fc, fu, (*func)(u, param));
             }
         }
-        else if ((u-ulim)*(ulim-*cx) >= 0.0) {
-            u=ulim;
-            fu=(*func)(u, param);
+        else if ((u - ulim) * (ulim - bracket.c) >= 0.0) {
+            u = ulim;
+            fu = (*func)(u, param);
         }
         else {
-            u=(*cx)+GOLD*(*cx-*bx);
-            fu=(*func)(u, param);
+            u = (bracket.c) + GOLD * (bracket.c - bracket.b);
+            fu = (*func)(u, param);
         }
-        SHFT(*ax,*bx,*cx,u);
-        SHFT(*fa,*fb,*fc,fu);
+
+        SHFT(bracket.a, bracket.b, bracket.c, u);
+        SHFT(fa, fb, fc, fu);
     }
+
+    return bracket;
 }
 
 double f1dim(double x, struct f1DimParam param) {
-    int j;
-    double f,*xt;
-    xt=malloc(param.ncom * sizeof(double));
-    for (j=0;j<param.ncom;j++) xt[j]=param.pcom[j]+x*param.xicom[j];
-    f=(*(param.nrfunc))(xt);
+    double* xt = malloc(param.ncom * sizeof(double));
+
+    for (int i = 0; i < param.ncom; i++) {
+        xt[i] = param.pcom[i] + x * param.xicom[i];
+    }
+
+    double f = (*(param.nrfunc))(xt);
+
     free(xt);
+    
     return f;
 }

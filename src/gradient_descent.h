@@ -24,4 +24,15 @@ struct f1DimParam {
     double (*nrfunc)(double[]);
 };
 
-double gradient_descent(double (*func)(double[]), void (*dfunc)(double[], double[]), double point[], int n);
+typedef struct MinBracket
+{
+    double a;
+    double b;
+    double c;
+} MinBracket;
+
+
+typedef double (*function)(double[]);
+typedef void (*derivative)(double[], double[]);
+
+double gradient_descent(function func, derivative dfunc, double point[], int n);
