@@ -7,15 +7,8 @@ static inline vec_size coordToIndex(vec_size row, vec_size col, vec_size size) {
     return row * size + col;
 }
 
-/**
- * Computes the absolute value of a real number
- * @param value number onto which the absolute value is applied
-*/
-static real_number real_abs(real_number value) {
-    if (value >= 0)
-        return value;
-    else
-        return -value;
+static inline vec_size isDiagonal(vec_size index, vec_size size) {
+    return (vec_size) ((index / size) == (index % size));
 }
 
 /**
@@ -38,7 +31,7 @@ void jacobiMaxIndex(real_number* matrix, vec_size size, vec_size* maxRow, vec_si
     for (vec_size i = 2; i < sizeSquared; ++i) {
         vec_size currentRow = i / size;
         vec_size currentCol = i % size;
-        real_number elem = real_abs(matrix[coordToIndex(currentRow, currentCol, size)]);
+        real_number elem = fabs(matrix[i]);
 
         if (currentRow != currentCol && elem > maxElement) {
             currentMaxRow = currentRow;
@@ -92,7 +85,7 @@ void jacobiCreateRotationMatrix(real_number* input, vec_size row, vec_size col, 
     real_number tau = (aqq - app) / (2.0 * apq);
     real_number t1 = -tau - sqrt(1 + tau * tau);
     real_number t2 = -tau + sqrt(1 + tau * tau);
-    real_number t = real_abs(t1) > real_abs(t2) ? t1 : t2;
+    real_number t = fabs(t1) > fabs(t2) ? t1 : t2;
 
     real_number c = 1.0 / (sqrt(1 + t * t));
     real_number s = c * t;
@@ -110,8 +103,8 @@ void jacobiCreateRotationMatrix(real_number* input, vec_size row, vec_size col, 
             output[i] = s;
         } else if (i == sIndex2) {
             output[i] = -s;
-        } else if (i / size == i % size) {
-            output[i] = 1; // Diagonal
+        } else if (isDiagonal(i, size)) {
+            output[i] = 1;
         } else {
             output[i] = 0; // Off diagonal
         }
@@ -126,7 +119,7 @@ void jacobiCreateRotationMatrix(real_number* input, vec_size row, vec_size col, 
 */
 void jacobiCreateIdentityMatrix(vec_size size, real_number* output) {
     for (vec_size i = 0; i < size * size; ++i) {
-        if (i / size == i % size) {
+        if (isDiagonal(i, size)) {
             output[i] = 1;
         } else {
             output[i] = 0;
@@ -143,7 +136,7 @@ vec_size jacobiComputeOffDiagonalSum(real_number* matrix, vec_size size) {
     vec_size sum = 0;
     
     for (vec_size i = 0; i < size * size; ++i) {
-        if (i / size != i % size) { // Off diagonal
+        if (!isDiagonal(i, size)) {
             sum += matrix[i];
         }
     }
@@ -160,12 +153,17 @@ vec_size jacobiComputeOffDiagonalSum(real_number* matrix, vec_size size) {
 */
 void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, vec_size iterations, vec_size cyclic) {
 
+    if (size == 1) {
+        memcpy(outputMatrix, inputMatrix, sizeof(real_number));
+        return;
+    }
+
     vec_size sizes3d[3] = {size, size, size};
     vec_size sweepSize = size * (size - 1) / 2; // A sweep is defined as a n * (n - 1) / 2 jacobi rotations
-    real_number p[size * size]; // Rotation matrix
+    real_number rotationMatrix[size * size];
     real_number vBuffer[size * size];
     real_number aBuffer[size * size];
-    vec_size maxRow, maxCol, indexToMinimize;
+    vec_size maxRow, maxCol, indexToMinimize = 1;
     vec_size sizeSquared = size * size;
 
     jacobiCreateIdentityMatrix(size, outputMatrix);
@@ -178,7 +176,7 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
             }
 
             indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
-            if (indexToMinimize / size == indexToMinimize % size) {
+            if (isDiagonal(indexToMinimize, size)) {
                 indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
             }
 
@@ -192,11 +190,11 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
             // In the first three sweeps, we keep the rotation matrix if |a_pq| > epsilon
             real_number epsilon_sweep = 0.20 * (jacobiComputeOffDiagonalSum(inputMatrix, size)) / ((real_number) (sizeSquared));
             if (inputMatrix[coordToIndex(maxRow, maxCol, size)] <= epsilon_sweep) {
-                jacobiCreateRotationMatrix(inputMatrix, maxRow, maxCol, p, size);
+                jacobiCreateRotationMatrix(inputMatrix, maxRow, maxCol, rotationMatrix, size);
             }
         } else {
 
-            real_number apq = real_abs(inputMatrix[coordToIndex(maxRow, maxCol, size)]);
+            real_number apq = fabs(inputMatrix[coordToIndex(maxRow, maxCol, size)]);
             real_number app = inputMatrix[coordToIndex(maxRow, maxRow, size)];
             real_number aqq = inputMatrix[coordToIndex(maxCol, maxCol, size)];
 
@@ -207,12 +205,12 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
                 continue;
             }
 
-            jacobiCreateRotationMatrix(inputMatrix, maxRow, maxCol, p, size);
+            jacobiCreateRotationMatrix(inputMatrix, maxRow, maxCol, rotationMatrix, size);
         }
 
-        jacobiMatrixMultiply(p, inputMatrix, sizes3d, aBuffer, 1);
-        jacobiMatrixMultiply(aBuffer, p, sizes3d, inputMatrix, 0);
-        jacobiMatrixMultiply(outputMatrix, p, sizes3d, vBuffer, 0);
+        jacobiMatrixMultiply(rotationMatrix, inputMatrix, sizes3d, aBuffer, 1);
+        jacobiMatrixMultiply(aBuffer, rotationMatrix, sizes3d, inputMatrix, 0);
+        jacobiMatrixMultiply(outputMatrix, rotationMatrix, sizes3d, vBuffer, 0);
         memcpy(outputMatrix, vBuffer, sizeof(real_number) * sizeSquared);
     }
 

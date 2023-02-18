@@ -30,6 +30,7 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
 	./$(BUILD_FOLDER)/test_poly_interpolation.out
+	./$(BUILD_FOLDER)/test_jacobi.out
 
 build_folder:
 	mkdir -p $(BUILD_FOLDER)
