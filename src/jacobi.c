@@ -186,7 +186,7 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
             jacobiMaxIndex(inputMatrix, size, &maxRow, &maxCol);
         }
 
-        if (i < 3 * sweepSize) {
+        if (i < 3 * sweepSize) { // The number 3 is proposed in the book Numerical Recipes
             // In the first three sweeps, we keep the rotation matrix if |a_pq| > epsilon
             real_number epsilon_sweep = 0.20 * (jacobiComputeOffDiagonalSum(inputMatrix, size)) / ((real_number) (sizeSquared));
             if (inputMatrix[coordToIndex(maxRow, maxCol, size)] <= epsilon_sweep) {
