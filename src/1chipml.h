@@ -19,5 +19,8 @@
 #include "./genetic.h"
 #include "./linear_congruential_random_generator.h"
 #include "./gradient_descent.h"
+#include "./DFT.h"
+#include "./FFT.h"
+#include "./lanczos.h"
 
 /* -- End of file -- */
