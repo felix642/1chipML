@@ -8,7 +8,7 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: linear_congruential_random_generator gauss_elimination poly_interpolation
+all: linear_congruential_random_generator gauss_elimination poly_interpolation gradient_descent
 
 test: all run_all_tests
 
@@ -21,10 +21,14 @@ gauss_elimination: ./tests/test_gauss_elimination.c ./src/gauss_elimination.c
 poly_interpolation: ./tests/test_poly_interpolation.c ./src/poly_interpolation.c
 	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
 
+gradient_descent: ./tests/test_gradient_descent.c ./src/gradient_descent.c
+	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+
 run_all_tests:
 	./test_linear_congruential_random_generator.out
 	./test_gauss_elimination.out
 	./test_poly_interpolation.out
+	./test_gradient_descent.out
 
 clean:
 	rm -rf test_*.out
