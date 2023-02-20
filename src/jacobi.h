@@ -9,7 +9,7 @@
     #define DIGITS_PRECISION 15
 #endif
 
-typedef double real_number;
+typedef float real_number;
 typedef unsigned int vec_size;
 
 #ifdef __cplusplus

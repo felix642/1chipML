@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-typedef double lanczos_real;
+typedef float lanczos_real;
 
 #ifdef __cplusplus
 extern "C" {
