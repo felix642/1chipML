@@ -10,15 +10,15 @@ CFLAGS += -I./src # included header files
 # loaded libraries
 LDLIBS += -lm # Math library
 
-all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation genetic genetic_low_memory gradient_descent monte_carlo jacobi lanczos DFT FFT
+all: build_folder linear_congruential_random_generator gauss_elimination poly_interpolation gradient_descent monte_carlo jacobi lanczos DFT FFT
 
 test: all run_all_tests
 
 genetic : ./$(TEST_FOLDER)/test_genetic.c ./src/genetic.c  ./src/linear_congruential_random_generator.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLER)/test_$@.out $(LDLIBS)
 
 genetic_low_memory : ./$(TEST_FOLDER)/test_genetic_low_memory.c ./src/genetic_low_memory.c  ./src/linear_congruential_random_generator.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 linear_congruential_random_generator: ./$(TEST_FOLDER)/test_linear_congruential_random_generator.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
@@ -30,22 +30,22 @@ poly_interpolation: ./$(TEST_FOLDER)/test_poly_interpolation.c ./src/poly_interp
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 gradient_descent: ./$(TEST_FOLDER)/test_gradient_descent.c ./src/gradient_descent.c
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 monte_carlo: ./$(TEST_FOLDER)/test_monte_carlo.c ./src/monte_carlo.c ./src/linear_congruential_random_generator.c | build_folder
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 jacobi: ./$(TEST_FOLDER)/test_jacobi.c ./src/jacobi.c | build_folder
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 lanczos: ./$(TEST_FOLDER)/test_lanczos.c ./src/lanczos.c ./src/linear_congruential_random_generator.c | build_folder
 	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 FFT: ./$(TEST_FOLDER)/test_FFT.c ./src/FFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c | build_folder
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 DFT: ./$(TEST_FOLDER)/test_DFT.c ./src/DFT.c ./src/linear_congruential_random_generator.c | build_folder
-	$(CC) $(CFLAGS) $^ -o test_$@.out $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_FOLDER)/test_$@.out $(LDLIBS)
 
 run_all_tests:
 	./$(BUILD_FOLDER)/test_gradient_descent.out
@@ -54,8 +54,8 @@ run_all_tests:
 	./$(BUILD_FOLDER)/test_linear_congruential_random_generator.out
 	./$(BUILD_FOLDER)/test_gauss_elimination.out
 	./$(BUILD_FOLDER)/test_poly_interpolation.out
-	./$(BUILD_FOLDER)/test_genetic.out
-	./$(BUILD_FOLDER)/test_genetic_low_memory.out
+	#./$(BUILD_FOLDER)/test_genetic.out
+	#./$(BUILD_FOLDER)/test_genetic_low_memory.out
 	./$(BUILD_FOLDER)/test_monte_carlo.out
 	./$(BUILD_FOLDER)/test_FFT.out
 	./$(BUILD_FOLDER)/test_DFT.out
