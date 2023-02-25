@@ -204,7 +204,7 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
             real_number aqq = inputMatrix[coordToIndex(maxCol, maxCol, size)];
 
             // If |apq| << |app| and |apq << |aqq|, set the element to 0 and continue with other element
-            real_number precision = pow(10, -(DIGITS_PRECISION + 2)); // Since all
+            real_number precision = pow(10, -(DIGITS_PRECISION + 2));
             if (apq < precision * app && apq < precision * aqq) {
                 inputMatrix[coordToIndex(maxRow, maxCol, size)] = 0;
                 i--;
