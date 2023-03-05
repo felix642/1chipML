@@ -131,17 +131,17 @@ void jacobiCreateIdentityMatrix(vec_size size, real_number* output) {
 }
 
 /**
- * Computes the off diagonal sum of a matrix (sums every element not in the diagonal)
+ * Computes the off diagonal absolute sum of a matrix (sums every element not in the diagonal)
  * @param matrix matrix to compute the sum on
  * @param size size of matrix
 */
-vec_size jacobiComputeOffDiagonalSum(real_number* matrix, vec_size size) {
-    vec_size sum = 0;
+real_number jacobiComputeOffDiagonalSum(real_number* matrix, vec_size size) {
+    real_number sum = 0;
     vec_size sizeSquared = size * size;
     
     for (vec_size i = 0; i < sizeSquared; ++i) {
         if (!isDiagonal(i, size)) {
-            sum += matrix[i];
+            sum += fabs(matrix[i]);
         }
     }
     return sum;
@@ -152,10 +152,10 @@ vec_size jacobiComputeOffDiagonalSum(real_number* matrix, vec_size size) {
  * @param inputMatrix matrix whose eigenvalues and eigenvectors we are looking for (will contain the eigenvalues after this function has been called)
  * @param size size of the matrix (matrix must be square)
  * @param outputMatrix matrix containing every eigenvector of the input matrix (same size as the input matrix)
- * @param iterations number of iterations of the algorithm
+ * @param max_iterations max number of iterations the algorithm can do (set to -1 to allow any amount of iterations)
  * @param cyclic whether to use the cyclic jacobi method or the classical version
 */
-void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, vec_size iterations, vec_size cyclic) {
+void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, vec_size max_iterations, vec_size cyclic) {
 
     if (size == 1) {
         memcpy(outputMatrix, inputMatrix, sizeof(real_number));
@@ -167,34 +167,36 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
     real_number rotationMatrix[size * size];
     real_number vBuffer[size * size];
     real_number aBuffer[size * size];
-    vec_size maxRow, maxCol, indexToMinimize = 1;
+    vec_size maxRow, maxCol, indexToMinimize = 0;
     vec_size sizeSquared = size * size;
 
     jacobiCreateIdentityMatrix(size, outputMatrix);
-
-    for (vec_size i = 0; i < iterations; ++i) {
-
+    real_number currentOffDiagonalSum = jacobiComputeOffDiagonalSum(inputMatrix, size);
+    vec_size allowInfiniteIterations = (vec_size) (max_iterations == -1);
+    for (vec_size i = 0; (allowInfiniteIterations || i < max_iterations) && currentOffDiagonalSum > EPSILON; ++i) {
         if (cyclic) {
-            if (indexToMinimize == (sizeSquared - 2)) {
-                indexToMinimize = 0;
-            }
+              if (indexToMinimize == (sizeSquared - 2)) {
+                  indexToMinimize = 0;
+              }
 
-            indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
-            if (isDiagonal(indexToMinimize, size)) {
-                indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
-            }
+              indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
+              if (isDiagonal(indexToMinimize, size)) {
+                  indexToMinimize = (indexToMinimize + 1) % (sizeSquared);
+              }
 
-            maxRow = indexToMinimize / size;
-            maxCol = indexToMinimize % size;
+              maxRow = indexToMinimize / size;
+              maxCol = indexToMinimize % size;
+
         } else {
             jacobiMaxIndex(inputMatrix, size, &maxRow, &maxCol);
         }
 
-        if (i < 3 * sweepSize) { // The number 3 is proposed in the book Numerical Recipes
+        if (i < 3 * sweepSize && i != 0) { // The number 3 is proposed in the book Numerical Recipes
             // In the first three sweeps, we keep the rotation matrix if |a_pq| > epsilon
             // The constant 0.20 is proposed in the book Numerical Recipes
-            real_number epsilon_sweep = 0.20 * (jacobiComputeOffDiagonalSum(inputMatrix, size)) / ((real_number) (sizeSquared));
-            if (inputMatrix[coordToIndex(maxRow, maxCol, size)] <= epsilon_sweep) {
+            real_number epsilon_sweep = 0.20 * (currentOffDiagonalSum) / ((real_number) (sizeSquared));
+
+            if (fabs(inputMatrix[coordToIndex(maxRow, maxCol, size)]) > epsilon_sweep) {
                 jacobiCreateRotationMatrix(inputMatrix, maxRow, maxCol, rotationMatrix, size);
             }
         } else {
@@ -218,6 +220,7 @@ void jacobi(real_number* inputMatrix, vec_size size, real_number* outputMatrix, 
         jacobiMatrixMultiply(aBuffer, rotationMatrix, sizes3d, inputMatrix, 0);
         jacobiMatrixMultiply(outputMatrix, rotationMatrix, sizes3d, vBuffer, 0);
         memcpy(outputMatrix, vBuffer, sizeof(real_number) * sizeSquared);
+        currentOffDiagonalSum = jacobiComputeOffDiagonalSum(inputMatrix, size);
     }
 
 }

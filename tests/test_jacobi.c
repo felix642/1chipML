@@ -1,6 +1,7 @@
 #include "jacobi.h"
 #include "stdio.h"
 
+
 int testMaximumIndex(real_number* input, vec_size size, vec_size expectedRow, vec_size expectedCol) {
 
     vec_size maxRow;
