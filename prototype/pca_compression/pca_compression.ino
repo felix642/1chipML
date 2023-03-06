@@ -1,14 +1,12 @@
 #define REAL_NUMBER float
 #define INTEGER uint8_t
 #define DIGITS_PRECISION 3
-#define DEBUG
+#define MATRIX_SIZE 8
+// #define DEBUG
 
 extern "C" {
   #include "jacobi.h"
 }
-
-#define LED_BUILTIN 13
-
 
 enum State {
   READING,
@@ -21,18 +19,15 @@ State state = State::READING;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(LED_BUILTIN, OUTPUT);
-
 }
 
-int size = 0;
-int totalSize = 0;
-float data[64];
+INTEGER size = 0;
+INTEGER totalSize = 0;
+REAL_NUMBER data[MATRIX_SIZE * MATRIX_SIZE];
 
 void read() {
   if (Serial.available()) {
-    
-    int i = 0;
+    INTEGER i = 0;
     String input = Serial.readString();
     if (input.length() > 0) {
       // parse input string to extract size and data
@@ -43,8 +38,6 @@ void read() {
         if (i == 0) {
           size = atoi(token);
           totalSize = size * size;
-          // data = new float[totalSize];
-          // out = new float[totalSize];
         } else {
           data[i - 1] = atof(token);
         }
@@ -54,33 +47,25 @@ void read() {
       delete[] str;
       // print size and data to serial monitor
       #ifdef DEBUG
-      Serial.print("Size of array: ");
-      Serial.println(totalSize);
-      Serial.print("Data: ");
-      for (int j = 0; j < totalSize; j++) {
-        Serial.print(data[j]);
-        Serial.print(" ");
-      }
-      Serial.println();
+        Serial.print("Size of array: ");
+        Serial.println(totalSize);
+        Serial.print("Data: ");
+        for (INTEGER j = 0; j < totalSize; j++) {
+          Serial.print(data[j]);
+          Serial.print(" ");
+        }
+        Serial.println();
       #endif
       state = State::PROCESSING;
     }
   }
 }
 
-void print(char* val) {
-  Serial.print(val);
-}
-
-void printInt(float val){
-  Serial.print(val);
-}
-
 
 void process() {
-  int sizes[3] = {size, size, size};
+  INTEGER sizes[3] = {size, size, size};
 
-  float* out = new float[totalSize];
+  REAL_NUMBER* out = new REAL_NUMBER[totalSize];
 
   jacobi(data, size, out, -1, 0);
 
@@ -89,22 +74,21 @@ void process() {
     Serial.print(out[i]);
     Serial.print(",");
   }
-  Serial.print(">");
-    Serial.print("<");
+  Serial.print("><");
   for (vec_size i = 0; i < totalSize; ++i) {
     Serial.print(data[i]);
     Serial.print(",");
   }
   Serial.print(">");
   Serial.print('!');
+
+  memset(data, 0, sizeof(REAL_NUMBER) * MATRIX_SIZE * MATRIX_SIZE);
+  delete[] out;
+  
   state = State::READING;
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  serialLog = print;
-  serialLogInt = printInt;
-
   switch (state) {
     case State::READING:
       read();
