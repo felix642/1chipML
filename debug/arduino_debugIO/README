@@ -1,0 +1,55 @@
+
+# Debugging guide
+
+## Arduino UNO
+
+### Requirements
+
+Visual Studio Code \
+PlatformIO extension on Visual Studio Code \
+libncurses5 (A PlatformIO dependency)
+
+```bash
+sudo apt-get install libncurses5
+```
+
+### Setup
+
+1. Go into the debug source directory.
+```bash
+cd ./debug/ArduinoDebugIO/src 
+```
+
+2. Create a symbolink link with the Arduino ".ino" file you wish to debug in the current debug source directory.
+
+Example:
+```bash
+ln -s ../../../prototype/FFT_image_processing/arduino_image_processing/arduino_image_processing.ino
+```
+
+3. Add all source files dependencies in the current debug source directory.
+Example:
+```bash
+ln -s ../../../src/FFT.c
+```
+```bash
+ln -s ../../../prototype/utils/arduino_serial_port.cpp
+```
+
+4. From the current debug source directory, go to the debug header directory.
+```bash
+cd ./../include
+```
+
+5. Add all header files dependencies in the current debug header directory.
+Example:
+```bash
+ln -s ../../../src/FFT.h
+```
+```bash
+ln -s ../../../prototype/utils/arduino_serial_port.h
+```
+
+6. 
+
+
