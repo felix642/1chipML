@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - main
-       paths:
+    paths:
       - '**.tex'
   pull_request:
     branches:
       - main
-       paths:
+    paths:
       - '**.tex'
 
 jobs:
