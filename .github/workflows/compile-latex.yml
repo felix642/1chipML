@@ -26,7 +26,17 @@ jobs:
         run: cd doc && pdflatex 1chipML_manual.tex
 
       - name: Upload PDF file
-        uses: actions/upload-artifact@v3
-        with:
-          name: PDF
-          path: doc/1chipML_manual.pdf
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: PDF
+      #     path: doc/1chipML_manual.pdf
+
+        env: 
+          CI_COMMIT_MESSAGE: Continuous Integration Build Artifacts
+          CI_COMMIT_AUTHOR: Continuous Integration
+        run: |
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "nicholaslegrand102@gmail.com"
+          git add  doc/1chipML_manual.tex
+          git commit -s -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
