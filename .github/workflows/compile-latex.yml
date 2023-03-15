@@ -5,12 +5,12 @@ on:
     branches:
       - main
        paths:
-      - doc/1chipML_manual.tex
+      - 'doc/**'
   pull_request:
     branches:
       - main
        paths:
-      - doc/1chipML_manual.tex
+      - 'doc/**'
 
 jobs:
   run-tests:
