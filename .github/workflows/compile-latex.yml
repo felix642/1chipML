@@ -12,12 +12,17 @@ jobs:
   run-tests:
     name: Compile and Add Latex
     runs-on: ubuntu-22.04
+    env: 
+          CI_COMMIT_MESSAGE: Built latex manual
+          CI_COMMIT_AUTHOR: Continuous Integration
     defaults:
       run:
         working-directory: .
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install pdflatex
         run: sudo apt-get install -y texlive-latex-base   texlive-latex-extra texlive-science texlive-font-utils
@@ -25,20 +30,24 @@ jobs:
       - name: Compile latex
         run: cd doc && pdflatex 1chipML_manual.tex
 
+
+
+      - name: Set environment variable "is-auto-commit"
+        if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
+        run: echo "is-auto-commit=true" >> $GITHUB_ENV
+
       - name: Upload PDF file
       #   uses: actions/upload-artifact@v3
       #   with:
       #     name: PDF
       #     path: doc/1chipML_manual.pdf
 
-        env: 
-          CI_COMMIT_MESSAGE: Built latex manual
-          CI_COMMIT_AUTHOR: Continuous Integration
+       
         
-        # if: github.event_name == 'push'
+        if: env.is-auto-commit == false
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "nicholaslegrand102@gmail.com"
           git add  doc/1chipML_manual.pdf
           git commit -s -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push origin HEAD:LatexPipeline
+          git push
