@@ -34,12 +34,12 @@ jobs:
       - name: Compile latex
         run: cd doc && pdflatex 1chipML_manual.tex
 
-      - name: Set environment variable "is-auto-commit"
+      - name: Check if commit is made by the workflow"
         if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
-        run: echo "is-auto-commit=true" >> $GITHUB_ENV
+        run: echo "autoCommit=true" >> $GITHUB_ENV
 
       - name: Upload PDF file
-        if: env.is-auto-commit == false && github.event_name == 'push'
+        if: env.autoCommit == false && github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "nicholaslegrand102@gmail.com"
