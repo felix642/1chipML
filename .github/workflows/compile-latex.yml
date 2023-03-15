@@ -5,12 +5,12 @@ on:
     branches:
       - main
        paths:
-      - 'doc/**'
+      - '*.tex'
   pull_request:
     branches:
       - main
        paths:
-      - 'doc/**'
+      - '*.tex'
 
 jobs:
   run-tests:
