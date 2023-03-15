@@ -34,7 +34,7 @@ jobs:
       #     path: doc/1chipML_manual.pdf
 
         env: 
-          CI_COMMIT_MESSAGE: Continuous Integration Build Artifacts
+          CI_COMMIT_MESSAGE: Built latex manual
           CI_COMMIT_AUTHOR: Continuous Integration
         if: github.event_name == 'push'
         run: |
