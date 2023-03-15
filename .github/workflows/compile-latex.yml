@@ -30,20 +30,11 @@ jobs:
       - name: Compile latex
         run: cd doc && pdflatex 1chipML_manual.tex
 
-
-
       - name: Set environment variable "is-auto-commit"
         if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
         run: echo "is-auto-commit=true" >> $GITHUB_ENV
 
       - name: Upload PDF file
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: PDF
-      #     path: doc/1chipML_manual.pdf
-
-       
-        
         if: env.is-auto-commit == false
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
