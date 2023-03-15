@@ -18,8 +18,6 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.WORKFLOW_GIT_ACCESS_TOKEN }}
 
       - name: Install pdflatex
         run: sudo apt-get install -y texlive-latex-base   texlive-latex-extra texlive-science texlive-font-utils
@@ -36,10 +34,11 @@ jobs:
         env: 
           CI_COMMIT_MESSAGE: Built latex manual
           CI_COMMIT_AUTHOR: Continuous Integration
-        if: github.event_name == 'push'
+          branch: 
+        # if: github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "nicholaslegrand102@gmail.com"
           git add  doc/1chipML_manual.pdf
           git commit -s -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push
+          git push origin ${{ github.ref_name }}
