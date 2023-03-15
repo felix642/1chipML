@@ -41,4 +41,4 @@ jobs:
           git config --global user.email "nicholaslegrand102@gmail.com"
           git add  doc/1chipML_manual.pdf
           git commit -s -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push 
+          git push origin HEAD:LatexPipeline
