@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+       paths:
+      - 'doc/1chipML_manual.tex'
   pull_request:
     branches:
       - main
+       paths:
+      - 'doc/1chipML_manual.tex'
 
 jobs:
   run-tests:
@@ -35,7 +39,7 @@ jobs:
         run: echo "is-auto-commit=true" >> $GITHUB_ENV
 
       - name: Upload PDF file
-        if: env.is-auto-commit == false
+        if: env.is-auto-commit == false && github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "nicholaslegrand102@gmail.com"
