@@ -1,4 +1,4 @@
-name: Build and Tests
+name: Latex action
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-tests:
-    name: Run tests
+    name: Compile and Add Latex
     runs-on: ubuntu-22.04
     defaults:
       run:
