@@ -29,17 +29,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install pdflatex
-        run: sudo apt-get install -y texlive-latex-base   texlive-latex-extra texlive-science texlive-font-utils
+        run: sudo apt-get install -y texlive-latex-base  texlive-latex-extra texlive-science texlive-font-utils
 
       - name: Compile latex
         run: cd doc && pdflatex 1chipML_manual.tex
 
-      - name: Check if commit is made by the workflow"
-        if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
-        run: echo "autoCommit=true" >> $GITHUB_ENV
-
       - name: Upload PDF file
-        if: env.autoCommit == false && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "nicholaslegrand102@gmail.com"
