@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - '**.tex'
+      - '1chipML_manual.tex'
   pull_request:
     branches:
       - main
     paths:
-      - '**.tex'
+      - '1chipML_manual.tex'
 
 jobs:
   run-tests:
@@ -38,7 +38,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
-          git config --global user.email "nicholaslegrand102@gmail.com"
+          git config --global user.email "${{ env.CI_COMMIT_AUTHOR }}@users.noreply.github.com"
           git add  doc/1chipML_manual.pdf
           git commit -s -m "${{ env.CI_COMMIT_MESSAGE }}"
           git push
